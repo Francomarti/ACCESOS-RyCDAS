@@ -1,8 +1,9 @@
 /* © 2026 Ing. Agr. Franco Martignoni, MP 4749 — Service worker del portal de Accesos RyCDAS.
    Red primero (siempre intenta traer lo último) y, si no hay señal, usa la copia guardada. */
-var CACHE = 'rycdas-portal-v1';
+var CACHE = 'rycdas-portal-v2';
 var SHELL = ['./', 'index.html', 'apps.json', 'manifest.webmanifest', 'logo.png',
-             'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
+             'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png',
+             'fondo-1.jpg', 'fondo-2.jpg', 'fondo-3.jpg', 'fondo-4.jpg'];
 
 self.addEventListener('install', function(e){
   e.waitUntil(
