@@ -208,6 +208,8 @@ function esFoto(header){ return /foto|carpeta/i.test(header); }
 function esWaypoint(header){ return /coorden|waypoint|ubicac|gps/i.test(header); }
 function esEstado(header){ return /^estado/i.test(header); }
 function esNotas(header){ return /nota|observ|coment/i.test(header); }
+function esSembrado(header){ return /^sembrad/i.test(header); }
+function esAfirmativo(valor){ return /^s/i.test(t(valor)); }
 
 function materialBox(nombre, bolsas, densidad, etiqueta){
   var nom = t(nombre);
@@ -226,11 +228,13 @@ function tarjetaSitio(fila, headers, idxEnSucursal){
 
   var acciones = [];
   var estadoTxt = '', notasTxt = '', fotoUrl = '';
+  var sembradoCol = null; // null = la planilla todavía no tiene columna "Sembrado"; si existe, true/false según Sí/No
 
   for(var i = 13; i < headers.length; i++){
     var h = t(headers[i]);
     var v = t(fila[i]);
     if(!h) continue;
+    if(esSembrado(h)){ sembradoCol = esAfirmativo(v); continue; }
     if(esEstado(h)){ if(v) estadoTxt = v; continue; }
     if(esNotas(h)){ if(v) notasTxt = v; continue; }
     if(!v) continue;
@@ -254,12 +258,16 @@ function tarjetaSitio(fila, headers, idxEnSucursal){
   }
 
   var tieneM1 = !!(t(fila[COL.M1]) || t(fila[COL.M1_BLS]) || t(fila[COL.M1_DEN]));
-  var badge = estadoTxt ? estadoTxt : (tieneM1 ? 'Sembrado' : 'Sin cargar');
+  // la columna "Sembrado" (Sí/No) manda cuando existe; si la planilla todavía no la tiene, se infiere por si hay Material 1 cargado
+  var sembrado = sembradoCol !== null ? sembradoCol : tieneM1;
+  var badge = estadoTxt ? estadoTxt : (sembrado ? 'Sembrado' : 'Sin sembrar');
+  // la fecha de siembra se muestra sólo cuando ya se confirmó que se sembró (si no hay columna "Sembrado" todavía, se muestra apenas esté cargada)
+  var mostrarFecha = !!fecha && (sembradoCol !== null ? sembrado : true);
 
   return '<li class="sitio">' +
     '<div class="sitio-top">' +
-      '<h3>' + (cliente ? esc(cliente) : '<i>Sin asignar</i>') + (fecha ? '<br><span class="fecha">Siembra: ' + esc(fecha) + '</span>' : '') + '</h3>' +
-      '<span class="badge' + (estadoTxt || tieneM1 ? ' on' : '') + '">' + esc(badge) + '</span>' +
+      '<h3>' + (cliente ? esc(cliente) : '<i>Sin asignar</i>') + (mostrarFecha ? '<br><span class="fecha">Siembra: ' + esc(fecha) + '</span>' : '') + '</h3>' +
+      '<span class="badge' + (estadoTxt || sembrado ? ' on' : '') + '">' + esc(badge) + '</span>' +
     '</div>' +
     '<div class="comparacion">' +
       materialBox(fila[COL.M1], fila[COL.M1_BLS], fila[COL.M1_DEN], 'Material 1') +
