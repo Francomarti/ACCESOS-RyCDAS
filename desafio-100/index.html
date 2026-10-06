@@ -138,7 +138,7 @@ var SHEET_ID = '1KMQx6pbm9pntxB5WE8tLi-m_uKHciaSaDs5afu6dHRg';
 var SHEET_TAB = 'Hoja 1';
 var SHEET_EDIT_URL = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/edit?usp=sharing';
 var CSV_URL = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(SHEET_TAB) + '&_=' ;
-var CADA_MS = 3 * 60 * 1000;
+var CADA_MS = 24 * 60 * 60 * 1000; // una vez por día — más que suficiente para esta planilla
 
 // Carpetas de Drive creadas para cada sitio (fallback si la planilla todavía no tiene
 // su propia columna de "Carpeta de fotos", o esa celda está vacía para ese sitio).
