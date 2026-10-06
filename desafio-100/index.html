@@ -200,16 +200,54 @@ function parseCSV(texto){
   return filas.filter(function(f){ return f.length > 1 || t(f[0]) !== ''; });
 }
 
-/* columnas fijas (A..M), por posición — así no importa que "Bolsas"/"Densidad" se repitan */
-var COL = { LOCALIDAD:0, FECHA:1, CLIENTE:2, M1:3, M1_BLS:4, M1_DEN:5, M2:6, M2_BLS:7, M2_DEN:8, COMP:9, COMP_BLS:10, COMP_DEN:11, COORD:12 };
-
+/* columnas: se detectan por el NOMBRE del encabezado, no por posición fija — así da igual
+   en qué lugar de la planilla se inserte una columna nueva (por ejemplo "Sembrado" en
+   el medio), el resto no se corre. "Bolsas"/"Densidad" se repiten 3 veces, así que para
+   cada material se toma la primera que aparece después del nombre de ESE material. */
 function esMapa(header){ return /ambient|satel|mapa/i.test(header); }
 function esFoto(header){ return /foto|carpeta/i.test(header); }
 function esWaypoint(header){ return /coorden|waypoint|ubicac|gps/i.test(header); }
 function esEstado(header){ return /^estado/i.test(header); }
 function esNotas(header){ return /nota|observ|coment/i.test(header); }
-function esSembrado(header){ return /^sembrad/i.test(header); }
 function esAfirmativo(valor){ return /^s/i.test(t(valor)); }
+
+function buscarColumna(headers, regex, usados, desde){
+  for(var i = desde || 0; i < headers.length; i++){
+    if(usados[i]) continue;
+    if(regex.test(t(headers[i]))) return i;
+  }
+  return -1;
+}
+
+function construirColumnas(headers){
+  var usados = {};
+  function marcar(i){ if(i >= 0) usados[i] = true; return i; }
+  function buscar(regex, desde){ return buscarColumna(headers, regex, usados, desde); }
+
+  var col = {};
+  col.LOCALIDAD = marcar(buscar(/localidad/i));
+  col.CLIENTE   = marcar(buscar(/cliente/i));
+  col.FECHA     = marcar(buscar(/fecha/i));
+  col.SEMBRADO  = marcar(buscar(/^sembrad/i));
+
+  function grupoMaterial(regexNombre){
+    var nombre = marcar(buscar(regexNombre));
+    var bls = nombre >= 0 ? marcar(buscar(/bolsa/i, nombre + 1)) : -1;
+    var den = bls >= 0 ? marcar(buscar(/densidad/i, bls + 1)) : -1;
+    return { nombre: nombre, bls: bls, den: den };
+  }
+  var m1 = grupoMaterial(/material\s*1\b/i);
+  var m2 = grupoMaterial(/material\s*2\b/i);
+  var comp = grupoMaterial(/competidor/i);
+  col.M1 = m1.nombre; col.M1_BLS = m1.bls; col.M1_DEN = m1.den;
+  col.M2 = m2.nombre; col.M2_BLS = m2.bls; col.M2_DEN = m2.den;
+  col.COMP = comp.nombre; col.COMP_BLS = comp.bls; col.COMP_DEN = comp.den;
+
+  col.COORD = marcar(buscar(/coorden|waypoint|ubicac|gps/i));
+
+  col._usados = usados;
+  return col;
+}
 
 function materialBox(nombre, bolsas, densidad, etiqueta){
   var nom = t(nombre);
@@ -221,20 +259,21 @@ function materialBox(nombre, bolsas, densidad, etiqueta){
     (det.length ? '<div class="det">' + esc(det.join(' · ')) + '</div>' : '') + '</div>';
 }
 
-function tarjetaSitio(fila, headers, idxEnSucursal){
-  var cliente = t(fila[COL.CLIENTE]);
-  var fecha = t(fila[COL.FECHA]);
-  var localidad = t(fila[COL.LOCALIDAD]);
+function tarjetaSitio(fila, headers, idxEnSucursal, columnas){
+  var cliente = t(fila[columnas.CLIENTE]);
+  var fecha = t(fila[columnas.FECHA]);
+  var localidad = t(fila[columnas.LOCALIDAD]);
 
   var acciones = [];
   var estadoTxt = '', notasTxt = '', fotoUrl = '';
-  var sembradoCol = null; // null = la planilla todavía no tiene columna "Sembrado"; si existe, true/false según Sí/No
+  // null = la planilla todavía no tiene columna "Sembrado"; si existe, true/false según Sí/No
+  var sembradoCol = columnas.SEMBRADO >= 0 ? esAfirmativo(fila[columnas.SEMBRADO]) : null;
 
-  for(var i = 13; i < headers.length; i++){
+  for(var i = 0; i < headers.length; i++){
+    if(columnas._usados[i]) continue;
     var h = t(headers[i]);
     var v = t(fila[i]);
     if(!h) continue;
-    if(esSembrado(h)){ sembradoCol = esAfirmativo(v); continue; }
     if(esEstado(h)){ if(v) estadoTxt = v; continue; }
     if(esNotas(h)){ if(v) notasTxt = v; continue; }
     if(!v) continue;
@@ -247,7 +286,7 @@ function tarjetaSitio(fila, headers, idxEnSucursal){
     }
   }
 
-  var coord = t(fila[COL.COORD]);
+  var coord = t(fila[columnas.COORD]);
   if(coord){
     acciones.unshift('<a class="accion" href="' + esc(urlCompleta(coord)) + '" target="_blank" rel="noopener">' + ICONO_PIN + 'Waypoint</a>');
   }
@@ -257,7 +296,7 @@ function tarjetaSitio(fila, headers, idxEnSucursal){
     acciones.push('<a class="accion" href="' + esc(fotoUrl) + '" target="_blank" rel="noopener">' + ICONO_FOTO + 'Fotos</a>');
   }
 
-  var tieneM1 = !!(t(fila[COL.M1]) || t(fila[COL.M1_BLS]) || t(fila[COL.M1_DEN]));
+  var tieneM1 = !!(t(fila[columnas.M1]) || t(fila[columnas.M1_BLS]) || t(fila[columnas.M1_DEN]));
   // la columna "Sembrado" (Sí/No) manda cuando existe; si la planilla todavía no la tiene, se infiere por si hay Material 1 cargado
   var sembrado = sembradoCol !== null ? sembradoCol : tieneM1;
   var badge = estadoTxt ? estadoTxt : (sembrado ? 'Sembrado' : 'Sin sembrar');
@@ -270,9 +309,9 @@ function tarjetaSitio(fila, headers, idxEnSucursal){
       '<span class="badge' + (estadoTxt || sembrado ? ' on' : '') + '">' + esc(badge) + '</span>' +
     '</div>' +
     '<div class="comparacion">' +
-      materialBox(fila[COL.M1], fila[COL.M1_BLS], fila[COL.M1_DEN], 'Material 1') +
-      materialBox(fila[COL.M2], fila[COL.M2_BLS], fila[COL.M2_DEN], 'Material 2') +
-      materialBox(fila[COL.COMP], fila[COL.COMP_BLS], fila[COL.COMP_DEN], 'Competidor') +
+      materialBox(fila[columnas.M1], fila[columnas.M1_BLS], fila[columnas.M1_DEN], 'Material 1') +
+      materialBox(fila[columnas.M2], fila[columnas.M2_BLS], fila[columnas.M2_DEN], 'Material 2') +
+      materialBox(fila[columnas.COMP], fila[columnas.COMP_BLS], fila[columnas.COMP_DEN], 'Competidor') +
     '</div>' +
     (acciones.length ? '<div class="acciones">' + acciones.join('') + '</div>' : '') +
     (notasTxt ? '<p class="notas"><b>Notas:</b> ' + esc(notasTxt) + '</p>' : '') +
@@ -282,14 +321,15 @@ function tarjetaSitio(fila, headers, idxEnSucursal){
 function render(filas){
   var headers = filas[0];
   var datos = filas.slice(1);
+  var columnas = construirColumnas(headers);
 
   var porSucursal = [];
   var indice = {};
   var contador = {};
-  var cargados = 0, conFotos = 0;
+  var cargados = 0;
 
   datos.forEach(function(fila){
-    var loc = t(fila[COL.LOCALIDAD]);
+    var loc = t(fila[columnas.LOCALIDAD]);
     if(!loc) return;
     contador[loc] = (contador[loc] || 0) + 1;
     if(indice[loc] === undefined){
@@ -297,12 +337,12 @@ function render(filas){
       porSucursal.push({ nombre: loc, filas: [] });
     }
     porSucursal[indice[loc]].filas.push({ fila: fila, pos: contador[loc] });
-    if(t(fila[COL.M1])) cargados++;
+    if(t(fila[columnas.M1])) cargados++;
   });
 
   var html = porSucursal.map(function(s){
     return '<div class="sucursal"><h2>' + esc(s.nombre) + ' <span class="cant">' + s.filas.length + '</span></h2>' +
-      '<ul class="sitios">' + s.filas.map(function(x){ return tarjetaSitio(x.fila, headers, x.pos); }).join('') + '</ul>' +
+      '<ul class="sitios">' + s.filas.map(function(x){ return tarjetaSitio(x.fila, headers, x.pos, columnas); }).join('') + '</ul>' +
     '</div>';
   }).join('');
 
@@ -312,10 +352,10 @@ function render(filas){
   // conteo de sitios con carpeta de fotos disponible (columna propia o fallback)
   var i2 = {}, cnt2 = 0;
   datos.forEach(function(fila){
-    var loc = t(fila[COL.LOCALIDAD]);
+    var loc = t(fila[columnas.LOCALIDAD]);
     if(!loc) return;
     i2[loc] = (i2[loc] || 0) + 1;
-    var tieneColFoto = headers.slice(13).some(function(h, j){ return esFoto(t(h)) && t(fila[13+j]); });
+    var tieneColFoto = headers.some(function(h, j){ return !columnas._usados[j] && esFoto(t(h)) && t(fila[j]); });
     if(tieneColFoto || FALLBACK_FOTOS[loc + '#' + i2[loc]]) cnt2++;
   });
   $('statFotos').textContent = cnt2 + '/' + datos.length;
