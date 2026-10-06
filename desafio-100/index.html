@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="author" content="Ing. Agr. Franco Martignoni (MP 4749)">
+<!-- © 2026 Ing. Agr. Franco Martignoni, MP 4749. Todos los derechos reservados. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Desafío 100 · RyCDAS</title>
+<meta name="description" content="Seguimiento de los 10 ensayos comparativos de rendimiento del Desafío 100 — RyCDAS 2026.">
+<meta name="theme-color" content="#D9E6CF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141914" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Desafío 100">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#D9E6CF; --surface:#F4F8EE; --ink:#1C2B1C; --muted:#526350; --rule:#B4C8A5;
+  --accent:#DD7530; --accent-ink:#9C4A15;
+  --chip:#E9F0E0;
+  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --sans:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#141914; --surface:#1C231C; --ink:#E4E8DC; --muted:#9AA592; --rule:#334033;
+    --accent:#E8894A; --accent-ink:#F0A874; --chip:#273027;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141914; --surface:#1C231C; --ink:#E4E8DC; --muted:#9AA592; --rule:#334033;
+  --accent:#E8894A; --accent-ink:#F0A874; --chip:#273027;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:680px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(40px + env(safe-area-inset-bottom,0px))}
+h1{font-family:var(--serif);font-weight:600;letter-spacing:-.01em;margin:0;font-size:clamp(26px,7vw,34px);line-height:1.05}
+h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0;letter-spacing:-.005em}
+p{margin:0}
+.muted{color:var(--muted)}
+a{color:var(--accent-ink);text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+.volver{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;font-weight:600;color:var(--muted)}
+.volver svg{width:15px;height:15px}
+
+header.top{margin-top:14px}
+header.top .sub{margin-top:5px;font-size:14px}
+
+.planilla{display:flex;align-items:center;gap:10px;width:100%;margin-top:16px;border:0;background:var(--accent);color:#fff;font-weight:600;font-size:14.5px;padding:13px 16px;border-radius:14px;text-align:left}
+.planilla svg{width:18px;height:18px;flex:none}
+.planilla span{flex:1}
+.planilla small{display:block;font-weight:400;font-size:12px;opacity:.88;margin-top:1px}
+
+.stats{display:flex;gap:10px;margin-top:14px}
+.stat{flex:1;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-family:var(--serif);font-size:20px;line-height:1.1}
+.stat span{font-size:11.5px;color:var(--muted)}
+
+.estado-fetch{margin-top:10px;font-size:12.5px;color:var(--muted);min-height:16px}
+
+.sucursal{margin-top:26px}
+.sucursal h2{display:flex;align-items:center;gap:8px}
+.sucursal .cant{font-size:12px;font-weight:600;color:var(--muted);background:var(--chip);border-radius:999px;padding:1px 8px}
+
+.sitios{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.sitio{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:13px 14px}
+.sitio-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.sitio-top h3{font-size:15.5px;font-weight:600;margin:0;line-height:1.3}
+.sitio-top h3 i{font-style:normal;color:var(--muted);font-weight:500}
+.fecha{font-size:12px;color:var(--muted);margin-top:1px}
+.badge{flex:none;font-size:10.5px;font-weight:700;letter-spacing:.01em;border-radius:999px;padding:3px 9px;background:var(--chip);color:var(--muted);white-space:nowrap}
+.badge.on{background:color-mix(in srgb,var(--accent) 18%,var(--chip));color:var(--accent-ink)}
+
+.comparacion{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:11px}
+.mat{background:var(--chip);border-radius:10px;padding:8px 9px}
+.mat .lbl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+.mat .nom{font-size:13.5px;font-weight:600;margin-top:2px;line-height:1.25}
+.mat .det{font-size:11px;color:var(--muted);margin-top:2px}
+
+.acciones{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.accion{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;background:var(--chip);color:var(--ink);border-radius:999px;padding:6px 11px 6px 9px}
+.accion svg{width:13px;height:13px;flex:none;color:var(--accent-ink)}
+.accion.vacio{color:var(--muted);font-weight:500;opacity:.8}
+
+.notas{margin-top:10px;font-size:12.5px;color:var(--muted);line-height:1.4;border-top:1px dashed var(--rule);padding-top:9px}
+.notas b{color:var(--ink);font-weight:600}
+
+footer{margin-top:30px;font-size:12.5px;text-align:center}
+noscript p{padding:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="volver" href="../">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+    Accesos
+  </a>
+
+  <header class="top">
+    <h1>Desafío 100</h1>
+    <p class="sub muted">10 ensayos comparativos de rendimiento · 2 por sucursal · 10 ha cada uno</p>
+  </header>
+
+  <button class="planilla" type="button" id="btnPlanilla">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+    <span>Abrir la planilla<small>Ahí se carga todo — este tablero se actualiza solo</small></span>
+  </button>
+
+  <div class="stats">
+    <div class="stat"><b id="statCargados">—</b><span>sitios con material cargado</span></div>
+    <div class="stat"><b id="statFotos">—</b><span>con carpeta de fotos</span></div>
+  </div>
+  <p class="estado-fetch" id="estadoFetch" aria-live="polite">Cargando datos de la planilla…</p>
+
+  <div id="contenido"></div>
+
+  <footer class="muted">Rindes y Cultivos DAS · Desafío 100</footer>
+  <noscript><p>Esta página necesita JavaScript para mostrar el tablero.</p></noscript>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+var SHEET_ID = '1KMQx6pbm9pntxB5WE8tLi-m_uKHciaSaDs5afu6dHRg';
+var SHEET_TAB = 'Hoja 1';
+var SHEET_EDIT_URL = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/edit?usp=sharing';
+var CSV_URL = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(SHEET_TAB) + '&_=' ;
+var CADA_MS = 3 * 60 * 1000;
+
+// Carpetas de Drive creadas para cada sitio (fallback si la planilla todavía no tiene
+// su propia columna de "Carpeta de fotos", o esa celda está vacía para ese sitio).
+// Clave: Localidad + "#" + posición del sitio dentro de esa sucursal (1 o 2), en el
+// mismo orden en que aparecen las filas de la planilla.
+var FALLBACK_FOTOS = {
+  'Bolivar#1':   '1TwYr0ALNucYWsiy1gJ6PPcsQZPhgbdq6',
+  'Bolivar#2':   '1UQWFoW_Uvcat4u5-_XsyztDXZ0knMvZL',
+  'Azul#1':      '1B0847h4JwqWns9uFmbQhqhk8vUDRDRrn',
+  'Azul#2':      '1nNp__g2h26Alz3f7OC7uuH0ROfymQQUK',
+  'Tandil#1':    '1bxOOBA8y9nDD4n_xiVO6JvB467-lvVug',
+  'Tandil#2':    '1_qy7T8kQcMqGB8LvwAY6s1B13igqonWj',
+  'Olavarria#1': '1jBAa3h6CX72e3xdVl54IDYXeuNRS0acZ',
+  'Olavarria#2': '1LdzY2unbGkaF1xIxZM4YDynX7H38iGnt',
+  'Belgrano#1':  '1rBIzc28ii77ABiAwjjc2UXbKon90A99q',
+  'Belgrano#2':  '1Y0eZjufsYCGUO_W7GiDWnKN3rGK14TYF'
+};
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function t(s){ return (s==null ? '' : String(s)).trim(); }
+
+var ICONO_PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+var ICONO_SAT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><path d="m10 7 7 7"/></svg>';
+var ICONO_MAPA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 13V4m0 3-6-3"/></svg>';
+var ICONO_FOTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg>';
+var ICONO_LINK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>';
+
+function urlCompleta(s){
+  s = t(s);
+  if(!s) return '';
+  if(/^https?:\/\//i.test(s)) return s;
+  return 'https://' + s;
+}
+function pareceUrl(s){
+  s = t(s);
+  return /^(https?:\/\/|[a-z0-9-]+\.[a-z]{2,}\/)/i.test(s);
+}
+
+/* ---- parser CSV (soporta comillas y comas embebidas, como lo exporta Google) ---- */
+function parseCSV(texto){
+  var filas = [], fila = [], campo = '', dentroComillas = false;
+  for(var i=0;i<texto.length;i++){
+    var c = texto[i];
+    if(dentroComillas){
+      if(c === '"'){
+        if(texto[i+1] === '"'){ campo += '"'; i++; } else dentroComillas = false;
+      } else campo += c;
+    } else {
+      if(c === '"') dentroComillas = true;
+      else if(c === ','){ fila.push(campo); campo = ''; }
+      else if(c === '\n' || c === '\r'){
+        if(c === '\r' && texto[i+1] === '\n') i++;
+        fila.push(campo); campo = ''; filas.push(fila); fila = [];
+      } else campo += c;
+    }
+  }
+  if(campo.length || fila.length){ fila.push(campo); filas.push(fila); }
+  return filas.filter(function(f){ return f.length > 1 || t(f[0]) !== ''; });
+}
+
+/* columnas fijas (A..M), por posición — así no importa que "Bolsas"/"Densidad" se repitan */
+var COL = { LOCALIDAD:0, FECHA:1, CLIENTE:2, M1:3, M1_BLS:4, M1_DEN:5, M2:6, M2_BLS:7, M2_DEN:8, COMP:9, COMP_BLS:10, COMP_DEN:11, COORD:12 };
+
+function esMapa(header){ return /ambient|satel|mapa/i.test(header); }
+function esFoto(header){ return /foto|carpeta/i.test(header); }
+function esWaypoint(header){ return /coorden|waypoint|ubicac|gps/i.test(header); }
+function esEstado(header){ return /^estado/i.test(header); }
+function esNotas(header){ return /nota|observ|coment/i.test(header); }
+
+function materialBox(nombre, bolsas, densidad, etiqueta){
+  var nom = t(nombre);
+  var det = [];
+  if(t(bolsas)) det.push(t(bolsas) + ' bls');
+  if(t(densidad)) det.push(t(densidad) + ' pl/ha');
+  return '<div class="mat"><div class="lbl">' + esc(etiqueta) + '</div>' +
+    '<div class="nom">' + (nom ? esc(nom) : '<span class="muted">—</span>') + '</div>' +
+    (det.length ? '<div class="det">' + esc(det.join(' · ')) + '</div>' : '') + '</div>';
+}
+
+function tarjetaSitio(fila, headers, idxEnSucursal){
+  var cliente = t(fila[COL.CLIENTE]);
+  var fecha = t(fila[COL.FECHA]);
+  var localidad = t(fila[COL.LOCALIDAD]);
+
+  var acciones = [];
+  var estadoTxt = '', notasTxt = '', fotoUrl = '';
+
+  for(var i = 13; i < headers.length; i++){
+    var h = t(headers[i]);
+    var v = t(fila[i]);
+    if(!h) continue;
+    if(esEstado(h)){ if(v) estadoTxt = v; continue; }
+    if(esNotas(h)){ if(v) notasTxt = v; continue; }
+    if(!v) continue;
+    if(esFoto(h)){ fotoUrl = urlCompleta(v); continue; }
+    var icono = esMapa(h) ? ICONO_MAPA : (esWaypoint(h) ? ICONO_PIN : ICONO_LINK);
+    if(pareceUrl(v)){
+      acciones.push('<a class="accion" href="' + esc(urlCompleta(v)) + '" target="_blank" rel="noopener">' + icono + esc(h) + '</a>');
+    } else {
+      acciones.push('<span class="accion">' + esc(h) + ': ' + esc(v) + '</span>');
+    }
+  }
+
+  var coord = t(fila[COL.COORD]);
+  if(coord){
+    acciones.unshift('<a class="accion" href="' + esc(urlCompleta(coord)) + '" target="_blank" rel="noopener">' + ICONO_PIN + 'Waypoint</a>');
+  }
+
+  if(!fotoUrl) fotoUrl = FALLBACK_FOTOS[localidad + '#' + idxEnSucursal] ? 'https://drive.google.com/drive/folders/' + FALLBACK_FOTOS[localidad + '#' + idxEnSucursal] : '';
+  if(fotoUrl){
+    acciones.push('<a class="accion" href="' + esc(fotoUrl) + '" target="_blank" rel="noopener">' + ICONO_FOTO + 'Fotos</a>');
+  }
+
+  var tieneM1 = !!(t(fila[COL.M1]) || t(fila[COL.M1_BLS]) || t(fila[COL.M1_DEN]));
+  var badge = estadoTxt ? estadoTxt : (tieneM1 ? 'Sembrado' : 'Sin cargar');
+
+  return '<li class="sitio">' +
+    '<div class="sitio-top">' +
+      '<h3>' + (cliente ? esc(cliente) : '<i>Sin asignar</i>') + (fecha ? '<br><span class="fecha">Siembra: ' + esc(fecha) + '</span>' : '') + '</h3>' +
+      '<span class="badge' + (estadoTxt || tieneM1 ? ' on' : '') + '">' + esc(badge) + '</span>' +
+    '</div>' +
+    '<div class="comparacion">' +
+      materialBox(fila[COL.M1], fila[COL.M1_BLS], fila[COL.M1_DEN], 'Material 1') +
+      materialBox(fila[COL.M2], fila[COL.M2_BLS], fila[COL.M2_DEN], 'Material 2') +
+      materialBox(fila[COL.COMP], fila[COL.COMP_BLS], fila[COL.COMP_DEN], 'Competidor') +
+    '</div>' +
+    (acciones.length ? '<div class="acciones">' + acciones.join('') + '</div>' : '') +
+    (notasTxt ? '<p class="notas"><b>Notas:</b> ' + esc(notasTxt) + '</p>' : '') +
+  '</li>';
+}
+
+function render(filas){
+  var headers = filas[0];
+  var datos = filas.slice(1);
+
+  var porSucursal = [];
+  var indice = {};
+  var contador = {};
+  var cargados = 0, conFotos = 0;
+
+  datos.forEach(function(fila){
+    var loc = t(fila[COL.LOCALIDAD]);
+    if(!loc) return;
+    contador[loc] = (contador[loc] || 0) + 1;
+    if(indice[loc] === undefined){
+      indice[loc] = porSucursal.length;
+      porSucursal.push({ nombre: loc, filas: [] });
+    }
+    porSucursal[indice[loc]].filas.push({ fila: fila, pos: contador[loc] });
+    if(t(fila[COL.M1])) cargados++;
+  });
+
+  var html = porSucursal.map(function(s){
+    return '<div class="sucursal"><h2>' + esc(s.nombre) + ' <span class="cant">' + s.filas.length + '</span></h2>' +
+      '<ul class="sitios">' + s.filas.map(function(x){ return tarjetaSitio(x.fila, headers, x.pos); }).join('') + '</ul>' +
+    '</div>';
+  }).join('');
+
+  $('contenido').innerHTML = html;
+  $('statCargados').textContent = cargados + '/' + datos.length;
+
+  // conteo de sitios con carpeta de fotos disponible (columna propia o fallback)
+  var i2 = {}, cnt2 = 0;
+  datos.forEach(function(fila){
+    var loc = t(fila[COL.LOCALIDAD]);
+    if(!loc) return;
+    i2[loc] = (i2[loc] || 0) + 1;
+    var tieneColFoto = headers.slice(13).some(function(h, j){ return esFoto(t(h)) && t(fila[13+j]); });
+    if(tieneColFoto || FALLBACK_FOTOS[loc + '#' + i2[loc]]) cnt2++;
+  });
+  $('statFotos').textContent = cnt2 + '/' + datos.length;
+}
+
+function traer(){
+  return fetch(CSV_URL + Date.now(), {cache:'no-store'}).then(function(r){
+    if(!r.ok) throw new Error('http ' + r.status);
+    return r.text();
+  }).then(parseCSV);
+}
+
+function cargar(primera){
+  if(!primera) $('estadoFetch').textContent = 'Actualizando…';
+  traer().then(function(filas){
+    render(filas);
+    var ahora = new Date();
+    $('estadoFetch').textContent = 'Actualizado ' + ahora.toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'}) + ' hs';
+  }).catch(function(){
+    $('estadoFetch').innerHTML = 'No se pudo traer la planilla ahora. <a href="' + SHEET_EDIT_URL + '" target="_blank" rel="noopener">Abrirla directo</a>.';
+  });
+}
+
+$('btnPlanilla').addEventListener('click', function(){
+  window.open(SHEET_EDIT_URL, '_blank', 'noopener');
+});
+
+cargar(true);
+setInterval(function(){ cargar(false); }, CADA_MS);
+document.addEventListener('visibilitychange', function(){ if(!document.hidden) cargar(false); });
+window.addEventListener('online', function(){ cargar(false); });
+})();
+</script>
+</body>
+</html>
