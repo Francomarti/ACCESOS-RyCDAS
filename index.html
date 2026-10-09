@@ -173,7 +173,7 @@ function fila(app,externa){
   return '<li class="card" data-url="' + esc(app.url) + '" role="link" tabindex="0">' +
     '<span class="mono">' + esc(iniciales(app.nombre)) + '</span>' +
     '<div class="card-txt"><h3>' + esc(app.nombre) + '</h3><p>' + esc(app.resumen) + '</p>' +
-    (externa ? '<span class="card-badge">Externa</span>' : '') + '</div>' +
+    (externa ? '<span class="card-badge">Externa</span>' : (app.badge ? '<span class="card-badge">' + esc(app.badge) + '</span>' : '')) + '</div>' +
     '<button class="card-copiar" type="button" data-url="' + esc(app.url) + '" aria-label="Copiar link de ' + esc(app.nombre) + '">' + ICONO_COPIAR + '</button>' +
     '<span class="card-ir" aria-hidden="true">' + ICONO_IR + '</span>' +
   '</li>';
