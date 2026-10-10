@@ -107,6 +107,7 @@ button{cursor:pointer}
 .card.desafio .card-copiar:active{background:#FFD9B5}
 .card.desafio .card-copiar.hecho{color:#E2722F}
 .logo-app{flex:none;width:62px;height:auto;max-width:100%;display:block}
+.logo-app.foto{width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)}
 /* Agrintel: blanco y verdes del logo, igual en los dos temas */
 .card.agrintel{background:#FFFFFF;border-color:#40916C;color:#152E21}
 .card.agrintel:active{background:#EEF6F1}
@@ -202,7 +203,7 @@ function copiar(txt){
 
 function fila(app,externa){
   return '<li class="card' + (/^(naranja|sembra|desafio|agrintel)$/.test(app.estilo || '') ? ' ' + app.estilo : '') + '" data-url="' + esc(app.url) + '" role="link" tabindex="0">' +
-    (app.logo ? '<img class="logo-app" src="' + esc(app.logo) + '" alt="" width="62" height="42">' : '<span class="mono">' + esc(iniciales(app.nombre)) + '</span>') +
+    (app.foto ? '<img class="logo-app foto" src="' + esc(app.foto) + '" alt="" width="46" height="46">' : app.logo ? '<img class="logo-app" src="' + esc(app.logo) + '" alt="" width="62" height="42">' : '<span class="mono">' + esc(iniciales(app.nombre)) + '</span>') +
     '<div class="card-txt"><h3>' + (app.marca && app.marca.length === 2 ? '<span class="m1">' + esc(app.marca[0]) + '</span><span class="m2">' + esc(app.marca[1]) + '</span>' : esc(app.nombre)) + '</h3>' + (app.resumen ? '<p>' + esc(app.resumen) + '</p>' : '') +
     (externa ? '<span class="card-badge">Externa</span>' : (app.badge ? '<span class="card-badge">' + esc(app.badge) + '</span>' : '')) + '</div>' +
     '<button class="card-copiar" type="button" data-url="' + esc(app.url) + '" aria-label="Copiar link de ' + esc(app.nombre) + '">' + ICONO_COPIAR + '</button>' +
