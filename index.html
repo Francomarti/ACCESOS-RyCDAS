@@ -107,6 +107,16 @@ button{cursor:pointer}
 .card.desafio .card-copiar:active{background:#FFD9B5}
 .card.desafio .card-copiar.hecho{color:#E2722F}
 .logo-app{flex:none;width:62px;height:auto;max-width:100%;display:block}
+/* Agrintel: blanco y verdes del logo, igual en los dos temas */
+.card.agrintel{background:#FFFFFF;border-color:#40916C;color:#152E21}
+.card.agrintel:active{background:#EEF6F1}
+.card.agrintel .logo-app{width:42px}
+.card.agrintel .card-txt h3{font-size:17px;font-weight:700;letter-spacing:.06em;color:#152E21}
+.card.agrintel .card-txt h3 .m2{color:#40916C}
+.card.agrintel .card-txt p,.card.agrintel .card-ir,.card.agrintel .card-copiar{color:#4A6656}
+.card.agrintel .card-badge{color:#40916C;border-color:#40916C}
+.card.agrintel .card-copiar:active{background:#E3F0E8}
+.card.agrintel .card-copiar.hecho{color:#40916C}
 .card-badge{display:inline-block;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--rule);border-radius:999px;padding:1px 8px;margin-top:5px}
 .card-ir{flex:none;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--muted)}
 .card-ir svg{width:17px;height:17px}
@@ -191,9 +201,9 @@ function copiar(txt){
 }
 
 function fila(app,externa){
-  return '<li class="card' + (/^(naranja|sembra|desafio)$/.test(app.estilo || '') ? ' ' + app.estilo : '') + '" data-url="' + esc(app.url) + '" role="link" tabindex="0">' +
+  return '<li class="card' + (/^(naranja|sembra|desafio|agrintel)$/.test(app.estilo || '') ? ' ' + app.estilo : '') + '" data-url="' + esc(app.url) + '" role="link" tabindex="0">' +
     (app.logo ? '<img class="logo-app" src="' + esc(app.logo) + '" alt="" width="62" height="42">' : '<span class="mono">' + esc(iniciales(app.nombre)) + '</span>') +
-    '<div class="card-txt"><h3>' + esc(app.nombre) + '</h3>' + (app.resumen ? '<p>' + esc(app.resumen) + '</p>' : '') +
+    '<div class="card-txt"><h3>' + (app.marca && app.marca.length === 2 ? '<span class="m1">' + esc(app.marca[0]) + '</span><span class="m2">' + esc(app.marca[1]) + '</span>' : esc(app.nombre)) + '</h3>' + (app.resumen ? '<p>' + esc(app.resumen) + '</p>' : '') +
     (externa ? '<span class="card-badge">Externa</span>' : (app.badge ? '<span class="card-badge">' + esc(app.badge) + '</span>' : '')) + '</div>' +
     '<button class="card-copiar" type="button" data-url="' + esc(app.url) + '" aria-label="Copiar link de ' + esc(app.nombre) + '">' + ICONO_COPIAR + '</button>' +
     '<span class="card-ir" aria-hidden="true">' + ICONO_IR + '</span>' +
