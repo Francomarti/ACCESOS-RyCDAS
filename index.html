@@ -99,6 +99,14 @@ button{cursor:pointer}
 .card.sembra .card-txt p,.card.sembra .card-ir,.card.sembra .card-copiar{color:#B8B8B2}
 .card.sembra .card-copiar:active{background:#1F1F1F}
 .card.sembra .card-copiar.hecho{color:#C8F31D}
+/* Desafío 100: durazno y naranja del logo, igual en los dos temas */
+.card.desafio{background:#FFE8D1;border-color:#F2884A;color:#5E3214}
+.card.desafio:active{background:#FFDDBD}
+.card.desafio .card-txt h3{color:#E2722F;font-size:17px;letter-spacing:.08em}
+.card.desafio .card-txt p,.card.desafio .card-ir,.card.desafio .card-copiar{color:#8A5530}
+.card.desafio .card-copiar:active{background:#FFD9B5}
+.card.desafio .card-copiar.hecho{color:#E2722F}
+.logo-app{flex:none;width:62px;height:auto;max-width:100%;display:block}
 .card-badge{display:inline-block;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--rule);border-radius:999px;padding:1px 8px;margin-top:5px}
 .card-ir{flex:none;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--muted)}
 .card-ir svg{width:17px;height:17px}
@@ -183,8 +191,8 @@ function copiar(txt){
 }
 
 function fila(app,externa){
-  return '<li class="card' + (app.estilo === 'naranja' || app.estilo === 'sembra' ? ' ' + app.estilo : '') + '" data-url="' + esc(app.url) + '" role="link" tabindex="0">' +
-    '<span class="mono">' + esc(iniciales(app.nombre)) + '</span>' +
+  return '<li class="card' + (/^(naranja|sembra|desafio)$/.test(app.estilo || '') ? ' ' + app.estilo : '') + '" data-url="' + esc(app.url) + '" role="link" tabindex="0">' +
+    (app.logo ? '<img class="logo-app" src="' + esc(app.logo) + '" alt="" width="62" height="42">' : '<span class="mono">' + esc(iniciales(app.nombre)) + '</span>') +
     '<div class="card-txt"><h3>' + esc(app.nombre) + '</h3>' + (app.resumen ? '<p>' + esc(app.resumen) + '</p>' : '') +
     (externa ? '<span class="card-badge">Externa</span>' : (app.badge ? '<span class="card-badge">' + esc(app.badge) + '</span>' : '')) + '</div>' +
     '<button class="card-copiar" type="button" data-url="' + esc(app.url) + '" aria-label="Copiar link de ' + esc(app.nombre) + '">' + ICONO_COPIAR + '</button>' +
