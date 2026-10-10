@@ -91,6 +91,14 @@ button{cursor:pointer}
 .card.naranja .mono{background:color-mix(in srgb,var(--accent) 12%,var(--surface));border-color:color-mix(in srgb,var(--accent) 30%,var(--rule));color:var(--accent-ink)}
 .card.naranja .card-txt h3{color:var(--accent-ink);font-size:17px;letter-spacing:.08em}
 .card.naranja .card-copiar:active{background:color-mix(in srgb,var(--accent) 14%,var(--surface))}
+/* Sembrá Evolución: negro y verde fluo de la marca, igual en los dos temas */
+.card.sembra{background:#0A0A0A;border-color:#C8F31D;color:#F4F4F1}
+.card.sembra:active{background:#161616}
+.card.sembra .mono{background:#C8F31D;border-color:#C8F31D;color:#0A0A0A;font-family:var(--sans);font-weight:700}
+.card.sembra .card-txt h3{color:#C8F31D;font-size:17px;letter-spacing:.08em}
+.card.sembra .card-txt p,.card.sembra .card-ir,.card.sembra .card-copiar{color:#B8B8B2}
+.card.sembra .card-copiar:active{background:#1F1F1F}
+.card.sembra .card-copiar.hecho{color:#C8F31D}
 .card-badge{display:inline-block;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--rule);border-radius:999px;padding:1px 8px;margin-top:5px}
 .card-ir{flex:none;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--muted)}
 .card-ir svg{width:17px;height:17px}
@@ -175,7 +183,7 @@ function copiar(txt){
 }
 
 function fila(app,externa){
-  return '<li class="card' + (app.estilo === 'naranja' ? ' naranja' : '') + '" data-url="' + esc(app.url) + '" role="link" tabindex="0">' +
+  return '<li class="card' + (app.estilo === 'naranja' || app.estilo === 'sembra' ? ' ' + app.estilo : '') + '" data-url="' + esc(app.url) + '" role="link" tabindex="0">' +
     '<span class="mono">' + esc(iniciales(app.nombre)) + '</span>' +
     '<div class="card-txt"><h3>' + esc(app.nombre) + '</h3>' + (app.resumen ? '<p>' + esc(app.resumen) + '</p>' : '') +
     (externa ? '<span class="card-badge">Externa</span>' : (app.badge ? '<span class="card-badge">' + esc(app.badge) + '</span>' : '')) + '</div>' +
