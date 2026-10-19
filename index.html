@@ -118,6 +118,14 @@ button{cursor:pointer}
 .card.agrintel .card-badge{color:#40916C;border-color:#40916C}
 .card.agrintel .card-copiar:active{background:#E3F0E8}
 .card.agrintel .card-copiar.hecho{color:#40916C}
+/* Granos: trigo dorado, igual en los dos temas */
+.card.granos{background:#F6EFD8;border-color:#C9A227;color:#4A3418}
+.card.granos:active{background:#EFE2B8}
+.card.granos .mono{background:#C9A227;border-color:#C9A227;color:#FFFDF6}
+.card.granos .card-txt h3{color:#8A6418;font-size:17px;letter-spacing:.08em}
+.card.granos .card-txt p,.card.granos .card-ir,.card.granos .card-copiar{color:#7A6038}
+.card.granos .card-copiar:active{background:#EFE2B8}
+.card.granos .card-copiar.hecho{color:#8A6418}
 .card-badge{display:inline-block;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--rule);border-radius:999px;padding:1px 8px;margin-top:5px}
 .card-ir{flex:none;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--muted)}
 .card-ir svg{width:17px;height:17px}
@@ -202,7 +210,7 @@ function copiar(txt){
 }
 
 function fila(app,externa){
-  return '<li class="card' + (/^(naranja|sembra|desafio|agrintel)$/.test(app.estilo || '') ? ' ' + app.estilo : '') + '" data-url="' + esc(app.url) + '" role="link" tabindex="0">' +
+  return '<li class="card' + (/^(naranja|sembra|desafio|agrintel|granos)$/.test(app.estilo || '') ? ' ' + app.estilo : '') + '" data-url="' + esc(app.url) + '" role="link" tabindex="0">' +
     (app.foto ? '<img class="logo-app foto" src="' + esc(app.foto) + '" alt="" width="46" height="46">' : app.logo ? '<img class="logo-app" src="' + esc(app.logo) + '" alt="" width="62" height="42">' : '<span class="mono">' + esc(iniciales(app.nombre)) + '</span>') +
     '<div class="card-txt"><h3>' + (app.marca && app.marca.length === 2 ? '<span class="m1">' + esc(app.marca[0]) + '</span><span class="m2">' + esc(app.marca[1]) + '</span>' : esc(app.nombre)) + '</h3>' + (app.resumen ? '<p>' + esc(app.resumen) + '</p>' : '') +
     (externa ? '<span class="card-badge">Externa</span>' : (app.badge ? '<span class="card-badge">' + esc(app.badge) + '</span>' : '')) + '</div>' +
