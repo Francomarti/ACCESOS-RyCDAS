@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="author" content="Ing. Agr. Franco Martignoni (MP 4749)">
+<!-- © 2026 Ing. Agr. Franco Martignoni, MP 4749. Todos los derechos reservados. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stock Tandil · RyCDAS</title>
+<meta name="description" content="Productos con stock bajo en Tandil para la temporada, según lo vendido el año pasado. Con clave.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#D9E6CF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141914" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Stock Tandil">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  box-sizing:border-box;
+  --bg:#D9E6CF; --surface:#F4F8EE; --ink:#1C2B1C; --muted:#526350; --rule:#B4C8A5;
+  --accent:#DD7530; --accent-ink:#9C4A15; --chip:#E9F0E0;
+  --barra:#3E6B47; --pista:#DDE7D3;
+  /* estados: fijos, siempre con ícono y texto al lado */
+  --critico:#d03b3b; --serio:#ec835a; --aviso:#fab219; --bien:#0ca30c;
+  --critico-txt:#A82626; --serio-txt:#A8461F; --aviso-txt:#8A5A00; --bien-txt:#1F7A1F;
+  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --sans:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#141914; --surface:#1C231C; --ink:#E4E8DC; --muted:#9AA592; --rule:#334033;
+    --accent:#E8894A; --accent-ink:#F0A874; --chip:#273027;
+    --barra:#8DBE92; --pista:#2A332A;
+    --critico-txt:#F08A8A; --serio-txt:#F3A07E; --aviso-txt:#F7C85A; --bien-txt:#5FCF5F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141914; --surface:#1C231C; --ink:#E4E8DC; --muted:#9AA592; --rule:#334033;
+  --accent:#E8894A; --accent-ink:#F0A874; --chip:#273027;
+  --barra:#8DBE92; --pista:#2A332A;
+  --critico-txt:#F08A8A; --serio-txt:#F3A07E; --aviso-txt:#F7C85A; --bien-txt:#5FCF5F;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(40px + env(safe-area-inset-bottom,0px))}
+h1{font-family:var(--serif);font-weight:600;letter-spacing:-.01em;margin:0;font-size:clamp(26px,7vw,34px);line-height:1.05}
+h2{font-family:var(--serif);font-weight:600;font-size:17px;margin:0;letter-spacing:-.005em}
+p{margin:0}
+.muted{color:var(--muted)}
+a{color:var(--accent-ink);text-decoration:none}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.num{font-variant-numeric:tabular-nums}
+
+.barra-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.volver{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;font-weight:600;color:var(--muted)}
+.volver svg{width:15px;height:15px}
+.btn-salir{border:1px solid var(--rule);background:none;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;color:var(--muted)}
+
+header.top{margin-top:14px}
+header.top .sub{margin-top:5px;font-size:14px}
+
+/* ---- clave ---- */
+.bloqueo{margin-top:28px;background:var(--surface);border:1px solid var(--rule);border-radius:16px;padding:20px 18px}
+.bloqueo .candado{width:44px;height:44px;border-radius:12px;background:var(--chip);display:grid;place-items:center;color:var(--accent-ink);margin-bottom:12px}
+.bloqueo .candado svg{width:22px;height:22px}
+.bloqueo label.campo{display:block;font-size:13px;font-weight:600;margin:16px 0 6px}
+.bloqueo input[type=password]{width:100%;font-size:16px;padding:12px 13px;border:1px solid var(--rule);border-radius:11px;background:var(--bg)}
+.recordar{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13.5px;color:var(--muted)}
+.recordar input{width:18px;height:18px;accent-color:var(--accent)}
+.btn-entrar{width:100%;margin-top:16px;border:0;background:var(--accent);color:#fff;font-weight:600;font-size:15px;padding:13px 16px;border-radius:12px}
+.btn-entrar[disabled]{opacity:.7;cursor:progress}
+.error{margin-top:10px;font-size:13.5px;font-weight:600;color:var(--critico-txt);min-height:18px}
+
+/* ---- número principal ---- */
+.hero{margin-top:18px;background:var(--surface);border:1px solid var(--rule);border-radius:16px;padding:16px 16px 14px}
+.hero .lbl{font-size:12.5px;color:var(--muted);font-weight:600}
+.hero b{display:block;font-family:var(--serif);font-weight:600;font-size:clamp(30px,9vw,42px);line-height:1.05;margin-top:2px}
+.hero p{font-size:13.5px;color:var(--muted);margin-top:4px}
+
+/* ---- estados ---- */
+.estados{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+@media (max-width:520px){.estados{grid-template-columns:repeat(2,1fr)}}
+.estado{text-align:left;background:var(--surface);border:1px solid var(--rule);border-radius:13px;padding:10px 11px}
+.estado[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.estado .et{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.02em}
+.estado b{display:block;font-family:var(--serif);font-size:24px;line-height:1.1;margin-top:4px}
+.estado small{display:block;font-size:11.5px;color:var(--muted);margin-top:1px}
+.ico{flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;color:#fff}
+.ico svg{width:10px;height:10px}
+.s-critico .ico{background:var(--critico)} .s-critico .et{color:var(--critico-txt)}
+.s-serio .ico{background:var(--serio)}     .s-serio .et{color:var(--serio-txt)}
+.s-aviso .ico{background:var(--aviso);color:#3a2a00} .s-aviso .et{color:var(--aviso-txt)}
+.s-bien .ico{background:var(--bien)}       .s-bien .et{color:var(--bien-txt)}
+
+/* ---- gráfico por rubro ---- */
+.bloque{margin-top:22px}
+.bloque .desc{font-size:13px;margin-top:2px}
+.rubros{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.rubro{display:grid;grid-template-columns:118px 1fr auto;align-items:center;gap:10px;padding:5px 6px;border-radius:9px;cursor:pointer;position:relative}
+.rubro:hover,.rubro.activo{background:var(--chip)}
+.rubro .nom{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rubro .pista{height:14px;position:relative}
+.rubro .fill{position:absolute;left:0;top:0;bottom:0;background:var(--barra);border-radius:0 4px 4px 0;min-width:2px}
+.rubro .val{font-size:12.5px;color:var(--muted);min-width:76px;text-align:right}
+.tip{position:fixed;z-index:10;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12.5px;padding:7px 10px;border-radius:9px;max-width:240px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.tip b{font-weight:700}
+
+/* ---- filtros ---- */
+.filtros{position:sticky;top:0;z-index:5;background:var(--bg);margin:22px -16px 0;padding:10px 16px 8px;border-bottom:1px solid var(--rule)}
+.fila-filtros{display:flex;gap:8px;flex-wrap:wrap}
+.buscar{flex:1 1 200px;min-width:0;font-size:15px;padding:9px 12px;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}
+.filtros select{flex:1 1 140px;min-width:0;font-size:14px;padding:9px 10px;border:1px solid var(--rule);border-radius:10px;background:var(--surface);max-width:100%}
+@media (min-width:600px){.filtros select{flex:0 1 auto}}
+@media (max-width:520px){.filtros{position:static}}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{border:1px solid var(--rule);background:var(--surface);border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.contador{font-size:12.5px;color:var(--muted);margin-top:7px}
+
+/* ---- productos ---- */
+.lista{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.prod{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:13px 14px}
+.prod-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.prod-top h3{font-size:15.5px;font-weight:600;margin:0;line-height:1.3}
+.prod-top .meta{font-size:12px;color:var(--muted);margin-top:1px}
+.badge{flex:none;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:.02em;border-radius:999px;padding:3px 9px 3px 4px;background:var(--chip);white-space:nowrap}
+.metricas{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:11px}
+@media (max-width:420px){.metricas{grid-template-columns:repeat(2,1fr)}}
+.met{background:var(--chip);border-radius:10px;padding:7px 9px}
+.met .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+.met .v{font-size:15px;font-weight:600;margin-top:1px}
+.met .v.neg{color:var(--critico-txt)}
+.met .d{font-size:11px;color:var(--muted)}
+.cobertura{margin-top:11px}
+.cob-pista{position:relative;height:10px;background:var(--pista);border-radius:5px}
+.cob-fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+.cob-marca{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55}
+.cob-txt{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--muted);margin-top:4px}
+.btn-arts{margin-top:10px;border:0;background:none;padding:2px 0;font-size:12.5px;font-weight:600;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px}
+.btn-arts svg{width:13px;height:13px;transition:transform .15s}
+.btn-arts[aria-expanded="true"] svg{transform:rotate(180deg)}
+.arts{margin-top:8px;overflow-x:auto}
+.arts table{width:100%;border-collapse:collapse;font-size:12.5px}
+.arts th{font-size:10px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:700;text-align:right;padding:4px 6px;border-bottom:1px solid var(--rule)}
+.arts th:first-child,.arts td:first-child{text-align:left;padding-left:0}
+.arts td{text-align:right;padding:5px 6px;border-bottom:1px dashed var(--rule)}
+.arts td:first-child{max-width:220px}
+.arts td small{display:block;color:var(--muted);font-size:11px}
+.vacio{padding:26px 10px;text-align:center;color:var(--muted)}
+
+details.como{margin-top:26px;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:12px 14px;font-size:13.5px}
+details.como summary{font-weight:600;cursor:pointer}
+details.como ul{margin:10px 0 2px;padding-left:18px;color:var(--muted)}
+details.como li{margin-bottom:5px}
+footer{margin-top:26px;font-size:12.5px;text-align:center}
+noscript p{padding:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="barra-top">
+    <a class="volver" href="../">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      Accesos
+    </a>
+    <button class="btn-salir" id="btnSalir" type="button" hidden>Cerrar sesión</button>
+  </div>
+
+  <header class="top">
+    <h1>Stock Tandil</h1>
+    <p class="sub muted" id="sub">Qué productos no alcanzan para la temporada, según lo vendido el año pasado.</p>
+  </header>
+
+  <!-- clave -->
+  <form class="bloqueo" id="bloqueo" autocomplete="on">
+    <div class="candado" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+    <h2>Solo para la sucursal Tandil</h2>
+    <p class="muted" style="font-size:13.5px;margin-top:3px">Pedile la clave a Franco.</p>
+    <input type="text" name="username" value="stock-tandil" autocomplete="username" hidden>
+    <label class="campo" for="clave">Clave</label>
+    <input type="password" id="clave" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+    <label class="recordar"><input type="checkbox" id="recordar" checked> Recordar en este dispositivo</label>
+    <button class="btn-entrar" id="btnEntrar" type="submit">Entrar</button>
+    <p class="error" id="error" aria-live="polite"></p>
+  </form>
+
+  <!-- tablero -->
+  <main id="tablero" hidden>
+    <section class="hero">
+      <p class="lbl">Para vender lo mismo que el año pasado hasta el <span id="hastaTxt"></span> falta</p>
+      <b class="num" id="heroUsd"></b>
+      <p id="heroTxt"></p>
+    </section>
+
+    <div class="estados" id="estados"></div>
+
+    <section class="bloque">
+      <h2>Faltante por rubro, en U$S</h2>
+      <p class="desc muted">Sin stock, urgente y bajo. Tocá un rubro para ver solo sus productos.</p>
+      <ul class="rubros" id="rubros"></ul>
+    </section>
+
+    <section class="filtros" aria-label="Filtros">
+      <div class="fila-filtros">
+        <input class="buscar" id="buscar" type="search" placeholder="Buscar producto o artículo…" autocomplete="off">
+        <select id="rubro" aria-label="Rubro"></select>
+        <select id="orden" aria-label="Ordenar">
+          <option value="usd">Más U$S faltante</option>
+          <option value="cob">Menos días de cobertura</option>
+          <option value="venta">Más venta esperada</option>
+          <option value="az">A–Z</option>
+        </select>
+      </div>
+      <div class="chips" id="chips"></div>
+      <p class="contador" id="contador"></p>
+    </section>
+
+    <ul class="lista" id="lista"></ul>
+
+    <details class="como">
+      <summary>Cómo se calcula</summary>
+      <ul id="como"></ul>
+    </details>
+  </main>
+
+  <footer class="muted" id="pie">Rindes y Cultivos DAS · Tandil</footer>
+  <noscript><p>Este tablero necesita JavaScript.</p></noscript>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+(function(){
+'use strict';
+
+var KEY = 'rycdas-stock-tandil';
+var ESTADOS = [
+  {id:'SIN STOCK', cls:'s-critico', txt:'Sin stock', ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>'},
+  {id:'URGENTE',   cls:'s-serio',   txt:'Urgente',   ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><path d="M12 5v9M12 19h.01"/></svg>'},
+  {id:'BAJO',      cls:'s-aviso',   txt:'Bajo',      ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><path d="M12 6v12M6 12l6 6 6-6"/></svg>'},
+  {id:'OK',        cls:'s-bien',    txt:'Alcanza',   ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>'}
+];
+var EST = {}; ESTADOS.forEach(function(e,i){ e.orden = i; EST[e.id] = e; });
+var COLOR = {'SIN STOCK':'var(--critico)', 'URGENTE':'var(--serio)', 'BAJO':'var(--aviso)', 'OK':'var(--bien)'};
+
+var D = null;                 // datos descifrados
+var filtro = {estado:'faltan', rubro:'', q:'', orden:'usd'};
+var abiertos = {};
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+var nf0 = new Intl.NumberFormat('es-AR', {maximumFractionDigits:0});
+function n0(x){ return nf0.format(Math.round(x || 0)); }
+function usd(x){
+  x = Math.round(x || 0);
+  if(Math.abs(x) >= 1e6) return 'U$S ' + new Intl.NumberFormat('es-AR',{maximumFractionDigits:2}).format(x/1e6) + ' M';
+  if(Math.abs(x) >= 1e4) return 'U$S ' + nf0.format(Math.round(x/1000)) + ' mil';
+  return 'U$S ' + nf0.format(x);
+}
+function fecha(iso, conAnio){ var p = (iso||'').split('-'); return p.length===3 ? (+p[2]) + '/' + (+p[1]) + (conAnio ? '/' + p[0] : '') : iso; }
+function norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+
+/* ---------- descifrado (PBKDF2-SHA256 -> AES-256-CBC + HMAC-SHA256) ---------- */
+function b64(s){ var b = atob(s), u = new Uint8Array(b.length); for(var i=0;i<b.length;i++) u[i] = b.charCodeAt(i); return u; }
+function aB64(u){ var s = ''; for(var i=0;i<u.length;i++) s += String.fromCharCode(u[i]); return btoa(s); }
+function derivar(clave, sobre){
+  var sub = crypto.subtle;
+  return sub.importKey('raw', new TextEncoder().encode(clave), 'PBKDF2', false, ['deriveBits']).then(function(base){
+    return sub.deriveBits({name:'PBKDF2', salt:b64(sobre.sal), iterations:sobre.it, hash:'SHA-256'}, base, 512);
+  }).then(function(bits){ return new Uint8Array(bits); });
+}
+function abrir(bits, sobre){
+  var sub = crypto.subtle, iv = b64(sobre.iv), ct = b64(sobre.datos), mac = b64(sobre.mac);
+  var junto = new Uint8Array(iv.length + ct.length); junto.set(iv); junto.set(ct, iv.length);
+  return sub.importKey('raw', bits.slice(32), {name:'HMAC', hash:'SHA-256'}, false, ['verify']).then(function(km){
+    return sub.verify('HMAC', km, mac, junto);
+  }).then(function(ok){
+    if(!ok) throw new Error('clave');
+    return sub.importKey('raw', bits.slice(0,32), {name:'AES-CBC'}, false, ['decrypt']);
+  }).then(function(ka){
+    return sub.decrypt({name:'AES-CBC', iv:iv}, ka, ct);
+  }).then(function(buf){ return JSON.parse(new TextDecoder().decode(buf)); });
+}
+function traerSobre(){
+  return fetch('datos.json?t=' + Date.now(), {cache:'no-store'}).then(function(r){
+    if(!r.ok) throw new Error('http');
+    return r.json();
+  });
+}
+
+/* ---------- entrada ---------- */
+var sobre = null;
+function mostrarError(t){ $('error').textContent = t; }
+function entrarCon(bits, recordar){
+  return abrir(bits, sobre).then(function(d){
+    if(recordar) lsSet(KEY, JSON.stringify({sal:sobre.sal, k:aB64(bits)}));
+    D = d; mostrarTablero();
+  });
+}
+$('bloqueo').addEventListener('submit', function(e){
+  e.preventDefault();
+  var clave = $('clave').value;
+  if(!clave) return;
+  if(!window.crypto || !crypto.subtle){ mostrarError('Este navegador no puede abrir el tablero. Probá con Chrome o Safari actualizados.'); return; }
+  $('btnEntrar').disabled = true; $('btnEntrar').textContent = 'Abriendo…'; mostrarError('');
+  (sobre ? Promise.resolve(sobre) : traerSobre().then(function(s){ sobre = s; return s; })).then(function(){
+    return derivar(clave, sobre);
+  }).then(function(bits){
+    return entrarCon(bits, $('recordar').checked);
+  }).catch(function(err){
+    mostrarError(err && err.message === 'clave' ? 'Clave incorrecta.' : 'No se pudieron traer los datos. Revisá la conexión.');
+  }).then(function(){ $('btnEntrar').disabled = false; $('btnEntrar').textContent = 'Entrar'; });
+});
+$('btnSalir').addEventListener('click', function(){ lsDel(KEY); location.reload(); });
+
+function iniciar(){
+  var guardado = null; try{ guardado = JSON.parse(lsGet(KEY)); }catch(e){}
+  traerSobre().then(function(s){
+    sobre = s;
+    if(guardado && guardado.sal === s.sal && window.crypto && crypto.subtle){
+      return entrarCon(b64(guardado.k), true).catch(function(){ lsDel(KEY); });
+    }
+  }).catch(function(){ mostrarError('No se pudieron traer los datos. Revisá la conexión.'); });
+}
+
+/* ---------- tablero ---------- */
+function faltan(p){ return p.e !== 'OK'; }
+function pasaFiltro(p){
+  if(filtro.estado === 'faltan' && !faltan(p)) return false;
+  if(filtro.estado !== 'faltan' && filtro.estado !== 'todos' && p.e !== filtro.estado) return false;
+  if(filtro.rubro && p.t !== filtro.rubro) return false;
+  if(filtro.q){
+    var q = norm(filtro.q);
+    var hay = norm(p.p + ' ' + p.t + ' ' + p.st);
+    if(hay.indexOf(q) < 0 && !(p.a||[]).some(function(a){ return norm(a.n + ' ' + a.co).indexOf(q) >= 0; })) return false;
+  }
+  return true;
+}
+function ordenar(l){
+  var f = {
+    usd:   function(a,b){ return EST[a.e].orden - EST[b.e].orden || b.fu - a.fu || b.vr - a.vr; },
+    cob:   function(a,b){ return (a.c == null ? 1e9 : a.c) - (b.c == null ? 1e9 : b.c) || b.fu - a.fu; },
+    venta: function(a,b){ return b.vr * (b.pr||0) - a.vr * (a.pr||0); },
+    az:    function(a,b){ return a.p.localeCompare(b.p, 'es'); }
+  }[filtro.orden];
+  return l.slice().sort(f);
+}
+
+function badge(e){ var s = EST[e]; return '<span class="badge ' + s.cls + '"><span class="ico">' + s.ico + '</span><span class="et">' + s.txt + '</span></span>'; }
+
+function htmlProducto(p, i){
+  var neg = p.d < 0;
+  var cubre = p.vr > 0 ? Math.max(0, Math.min(1, p.d / p.vr)) : 1;
+  var marca30 = p.vr > 0 ? Math.max(0, Math.min(1, p.v30 / p.vr)) : 0;
+  var cobTxt = p.d <= 0 ? (neg ? 'Ya hay ' + n0(-p.d) + ' vendidos sin stock' : 'No hay disponible')
+             : cubre >= 1 ? 'Cubre toda la temporada' : 'Cubre ' + Math.round(cubre*100) + '% · unos ' + n0(p.c) + ' días';
+  var arts = p.a || [];
+  return '<li class="prod">' +
+    '<div class="prod-top"><div><h3>' + esc(p.p) + '</h3><p class="meta">' + esc(p.t) + (p.st && p.st !== p.t ? ' · ' + esc(p.st) : '') + '</p></div>' + badge(p.e) + '</div>' +
+    '<div class="metricas">' +
+      '<div class="met"><div class="lbl">Disponible</div><div class="v num' + (neg ? ' neg' : '') + '">' + n0(p.d) + '</div><div class="d">físico ' + n0(p.fi) + '</div></div>' +
+      '<div class="met"><div class="lbl">Próx. 30 días</div><div class="v num">' + n0(p.v30) + '</div><div class="d">año pasado</div></div>' +
+      '<div class="met"><div class="lbl">Hasta ' + fecha(D.hasta) + '</div><div class="v num">' + n0(p.vr) + '</div><div class="d">año pasado</div></div>' +
+      '<div class="met"><div class="lbl">Falta</div><div class="v num">' + n0(p.fa) + '</div><div class="d">' + (p.fu > 0 ? usd(p.fu) : '—') + '</div></div>' +
+    '</div>' +
+    '<div class="cobertura" title="Disponible contra la venta esperada hasta el ' + fecha(D.hasta) + '">' +
+      '<div class="cob-pista"><div class="cob-fill" style="width:' + (cubre*100).toFixed(1) + '%;background:' + COLOR[p.e] + '"></div>' +
+      (marca30 > 0 && marca30 < 1 ? '<div class="cob-marca" style="left:calc(' + (marca30*100).toFixed(1) + '% - 1px)"></div>' : '') + '</div>' +
+      '<div class="cob-txt"><span>' + cobTxt + '</span><span>' + (marca30 > 0 && marca30 < 1 ? 'la rayita marca 30 días' : '') + '</span></div>' +
+    '</div>' +
+    (arts.length ? '<button class="btn-arts" type="button" data-i="' + i + '" aria-expanded="' + (abiertos[p.p] ? 'true' : 'false') + '">' + (arts.length === 1 ? 'Ver el artículo' : 'Ver los ' + arts.length + ' artículos') +
+      ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
+      '<div class="arts"' + (abiertos[p.p] ? '' : ' hidden') + '>' + tablaArts(arts) + '</div>' : '') +
+  '</li>';
+}
+function tablaArts(arts){
+  return '<table><thead><tr><th>Artículo</th><th>Disp.</th><th>Físico</th><th>N.V. a entregar</th><th>Venta hasta ' + fecha(D.hasta) + '</th></tr></thead><tbody>' +
+    arts.slice().sort(function(a,b){ return b.vr - a.vr || b.d - a.d; }).map(function(a){
+      return '<tr><td>' + esc(a.n) + (a.co ? '<small>' + esc(a.co) + '</small>' : '') + '</td><td class="num">' + n0(a.d) + '</td><td class="num">' + n0(a.fi) + '</td><td class="num">' + n0(a.nv) + '</td><td class="num">' + n0(a.vr) + '</td></tr>';
+    }).join('') + '</tbody></table>';
+}
+
+var visibles = [];
+function pintarLista(){
+  visibles = ordenar(D.productos.filter(pasaFiltro));
+  $('lista').innerHTML = visibles.length ? visibles.map(htmlProducto).join('') : '<li class="vacio">No hay productos con este filtro.</li>';
+  var tot = visibles.reduce(function(s,p){ return s + (p.fu||0); }, 0);
+  $('contador').textContent = visibles.length + (visibles.length === 1 ? ' producto' : ' productos') + (tot > 0 ? ' · faltan ' + usd(tot) : '');
+}
+function pintarChips(){
+  var cnt = function(f){ return D.productos.filter(f).length; };
+  var chips = [{id:'faltan', txt:'Faltan', n:cnt(faltan)}]
+    .concat(ESTADOS.map(function(e){ return {id:e.id, txt:e.txt, n:cnt(function(p){ return p.e === e.id; })}; }))
+    .concat([{id:'todos', txt:'Todos', n:D.productos.length}]);
+  $('chips').innerHTML = chips.map(function(c){ return '<button class="chip" type="button" data-estado="' + esc(c.id) + '" aria-pressed="' + (filtro.estado === c.id) + '">' + esc(c.txt) + ' · ' + c.n + '</button>'; }).join('');
+  Array.prototype.forEach.call($('estados').children, function(b){ b.setAttribute('aria-pressed', String(filtro.estado === b.dataset.estado)); });
+}
+function pintarRubros(){
+  var porRubro = {};
+  D.productos.forEach(function(p){ if(!faltan(p)) return; var r = porRubro[p.t] || (porRubro[p.t] = {t:p.t, usd:0, n:0}); r.usd += p.fu || 0; r.n++; });
+  var l = Object.keys(porRubro).map(function(k){ return porRubro[k]; }).sort(function(a,b){ return b.usd - a.usd; });
+  var max = l.length ? l[0].usd : 1;
+  $('rubros').innerHTML = l.map(function(r){
+    return '<li class="rubro' + (filtro.rubro === r.t ? ' activo' : '') + '" data-rubro="' + esc(r.t) + '" data-tip="<b>' + esc(r.t) + '</b><br>' + r.n + (r.n === 1 ? ' producto' : ' productos') + ' · falta ' + esc(usd(r.usd)) + '" tabindex="0" role="button" aria-pressed="' + (filtro.rubro === r.t) + '">' +
+      '<span class="nom">' + esc(r.t) + '</span><span class="pista"><span class="fill" style="width:' + (max > 0 ? (r.usd / max * 100).toFixed(1) : 0) + '%"></span></span><span class="val num">' + esc(usd(r.usd)) + '</span></li>';
+  }).join('');
+  var rubros = Array.from(new Set(D.productos.map(function(p){ return p.t; }))).sort();
+  $('rubro').innerHTML = '<option value="">Todos los rubros</option>' + rubros.map(function(r){ return '<option' + (filtro.rubro === r ? ' selected' : '') + '>' + esc(r) + '</option>'; }).join('');
+}
+function pintar(){ pintarRubros(); pintarChips(); pintarLista(); }
+
+function mostrarTablero(){
+  $('bloqueo').hidden = true; $('tablero').hidden = false; $('btnSalir').hidden = false;
+  $('sub').textContent = 'Stock del sistema al ' + D.datos.split(' ')[0].split('-').reverse().join('/') + ' · comparado con lo vendido en Tandil del ' + fecha(D.ref) + ' al ' + fecha(D.hasta, true);
+  $('hastaTxt').textContent = fecha(D.hasta);
+  var fal = D.productos.filter(faltan);
+  $('heroUsd').textContent = usd(fal.reduce(function(s,p){ return s + (p.fu||0); }, 0));
+  $('heroTxt').textContent = fal.length + ' de ' + D.productos.length + ' productos que se vendieron en esta época no alcanzan con el disponible de hoy (a precio promedio del año pasado).';
+  $('estados').innerHTML = ESTADOS.map(function(e){
+    var l = D.productos.filter(function(p){ return p.e === e.id; });
+    var u = l.reduce(function(s,p){ return s + (p.fu||0); }, 0);
+    return '<button class="estado ' + e.cls + '" type="button" data-estado="' + e.id + '" aria-pressed="false">' +
+      '<span class="et"><span class="ico">' + e.ico + '</span>' + e.txt + '</span><b class="num">' + l.length + '</b><small>' + (e.id === 'OK' ? 'cubren la temporada' : 'faltan ' + esc(usd(u))) + '</small></button>';
+  }).join('');
+  $('como').innerHTML = [
+    'Stock: Inventario &gt; Consulta de Stock en el área TANDIL, con Area: Sucursal. Disponible = físico − notas de venta a entregar.',
+    'Venta esperada: lo facturado en Tandil del ' + fecha(D.ref, true) + ' al ' + fecha(D.hasta, true) + ' (' + D.dias + ' días). Las notas de crédito restan.',
+    '<b>Sin stock</b>: no hay disponible. <b>Urgente</b>: no alcanza para lo que se vendió en los próximos 30 días del año pasado. <b>Bajo</b>: alcanza 30 días pero no hasta el ' + fecha(D.hasta) + '.',
+    'Falta = venta del año pasado − disponible. En U$S, a precio promedio facturado.',
+    'Cantidades en la unidad del sistema (litros, kilos, bolsas). Cada producto junta las marcas o calibres del mismo activo o híbrido; el detalle está en "Ver artículos".',
+    'No tiene en cuenta órdenes de compra ni mercadería en tránsito.'
+  ].map(function(t){ return '<li>' + t + '</li>'; }).join('');
+  $('pie').textContent = 'Rindes y Cultivos DAS · Tandil · ' + D.productos.length + ' productos';
+  pintar();
+}
+
+/* ---------- eventos ---------- */
+document.body.addEventListener('click', function(e){
+  var t = e.target.closest('[data-estado]');
+  if(t){ var id = t.dataset.estado; filtro.estado = (filtro.estado === id && t.classList.contains('estado')) ? 'faltan' : id; pintarChips(); pintarLista(); return; }
+  var r = e.target.closest('.rubro');
+  if(r){ filtro.rubro = filtro.rubro === r.dataset.rubro ? '' : r.dataset.rubro; ocultarTip(); pintarRubros(); pintarLista(); return; }
+  var b = e.target.closest('.btn-arts');
+  if(b){
+    var p = visibles[+b.dataset.i]; abiertos[p.p] = !abiertos[p.p];
+    b.setAttribute('aria-expanded', String(!!abiertos[p.p])); b.nextElementSibling.hidden = !abiertos[p.p];
+  }
+});
+document.body.addEventListener('keydown', function(e){
+  var r = e.target.closest && e.target.closest('.rubro');
+  if(r && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); r.click(); }
+});
+$('rubro').addEventListener('change', function(){ filtro.rubro = this.value; pintarRubros(); pintarLista(); });
+$('orden').addEventListener('change', function(){ filtro.orden = this.value; pintarLista(); });
+var tBuscar;
+$('buscar').addEventListener('input', function(){ var v = this.value; clearTimeout(tBuscar); tBuscar = setTimeout(function(){ filtro.q = v.trim(); pintarLista(); }, 150); });
+
+/* tooltip de las barras */
+var tip = $('tip');
+function ocultarTip(){ tip.hidden = true; }
+$('rubros').addEventListener('mousemove', function(e){
+  var r = e.target.closest('.rubro'); if(!r){ ocultarTip(); return; }
+  tip.innerHTML = r.dataset.tip; tip.hidden = false;
+  var x = Math.min(e.clientX + 14, window.innerWidth - tip.offsetWidth - 8);
+  tip.style.left = x + 'px'; tip.style.top = (e.clientY + 14) + 'px';
+});
+$('rubros').addEventListener('mouseleave', ocultarTip);
+
+iniciar();
+})();
+</script>
+</body>
+</html>
