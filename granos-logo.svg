@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 124 84" role="img" aria-label="Girasol, maíz y soja">
+  <!-- © 2026 Ing. Agr. Franco Martignoni, MP 4749 — ilustración de granos (girasol, maíz y soja) para la tarjeta GRANOS -->
+  <defs>
+    <clipPath id="marcoG"><rect width="124" height="84" rx="12"/></clipPath>
+    <linearGradient id="fondoG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FBF3DC"/>
+      <stop offset="1" stop-color="#F1E3BC"/>
+    </linearGradient>
+    <radialGradient id="petaloG" cx=".35" cy=".3" r=".8">
+      <stop offset="0" stop-color="#FBE27A"/>
+      <stop offset="1" stop-color="#E8B923"/>
+    </radialGradient>
+    <linearGradient id="granoMaiz" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FBE27A"/>
+      <stop offset="1" stop-color="#E8B923"/>
+    </linearGradient>
+    <linearGradient id="vainaSoja" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8FB06A"/>
+      <stop offset="1" stop-color="#70924C"/>
+    </linearGradient>
+  </defs>
+  <g clip-path="url(#marcoG)">
+    <rect width="124" height="84" fill="url(#fondoG)"/>
+
+    <!-- girasol, arriba a la izquierda -->
+    <g transform="translate(26,24)">
+      <g fill="url(#petaloG)" stroke="#C9941A" stroke-width=".6">
+        <ellipse cx="0" cy="-17" rx="5.5" ry="9"/>
+        <ellipse cx="12" cy="-12.5" rx="5.5" ry="9" transform="rotate(45 12 -12.5)"/>
+        <ellipse cx="17" cy="0" rx="5.5" ry="9" transform="rotate(90 17 0)"/>
+        <ellipse cx="12" cy="12.5" rx="5.5" ry="9" transform="rotate(135 12 12.5)"/>
+        <ellipse cx="0" cy="17" rx="5.5" ry="9" transform="rotate(180 0 17)"/>
+        <ellipse cx="-12" cy="12.5" rx="5.5" ry="9" transform="rotate(225 -12 12.5)"/>
+        <ellipse cx="-17" cy="0" rx="5.5" ry="9" transform="rotate(270 -17 0)"/>
+        <ellipse cx="-12" cy="-12.5" rx="5.5" ry="9" transform="rotate(315 -12 -12.5)"/>
+      </g>
+      <circle r="11.5" fill="#6B4B1E"/>
+      <g fill="#4A3414">
+        <circle cx="0" cy="-5.5" r="1.1"/><circle cx="4.2" cy="-3.6" r="1.1"/><circle cx="6.5" cy="0.6" r="1.1"/>
+        <circle cx="4.6" cy="4.8" r="1.1"/><circle cx="0" cy="6.5" r="1.1"/><circle cx="-4.6" cy="4.8" r="1.1"/>
+        <circle cx="-6.5" cy="0.6" r="1.1"/><circle cx="-4.2" cy="-3.6" r="1.1"/><circle cx="0" cy="0" r="1.1"/>
+      </g>
+    </g>
+
+    <!-- choclo de maiz, en diagonal al centro -->
+    <g transform="translate(66,46) rotate(-18)">
+      <rect x="-9" y="-24" width="18" height="40" rx="9" fill="#EADFBE"/>
+      <path d="M-9 -8 C-14 -16 -13 -28 -4 -34 L4 -34 C13 -28 14 -16 9 -8 Z" fill="#8BA35A"/>
+      <g fill="url(#granoMaiz)" stroke="#C9941A" stroke-width=".4">
+        <circle cx="-5.2" cy="-4" r="2.7"/><circle cx="0" cy="-4" r="2.7"/><circle cx="5.2" cy="-4" r="2.7"/>
+        <circle cx="-5.2" cy="1.6" r="2.7"/><circle cx="0" cy="1.6" r="2.7"/><circle cx="5.2" cy="1.6" r="2.7"/>
+        <circle cx="-5.2" cy="7.2" r="2.7"/><circle cx="0" cy="7.2" r="2.7"/><circle cx="5.2" cy="7.2" r="2.7"/>
+        <circle cx="-5.2" cy="12.8" r="2.7"/><circle cx="0" cy="12.8" r="2.7"/><circle cx="5.2" cy="12.8" r="2.7"/>
+      </g>
+    </g>
+
+    <!-- vaina de soja, abajo a la derecha -->
+    <g transform="translate(98,58) rotate(12)">
+      <path d="M-9 -12 C-15 -4 -15 6 -9 13 C-3 18 4 17 8 11 C12 4 11 -6 6 -12 C1 -17 -4 -17 -9 -12 Z" fill="url(#vainaSoja)" stroke="#567239" stroke-width=".6"/>
+      <circle cx="-3.5" cy="-4" r="4.1" fill="#E8D9A8" stroke="#B9A368" stroke-width=".4"/>
+      <circle cx="1" cy="5" r="4.3" fill="#E8D9A8" stroke="#B9A368" stroke-width=".4"/>
+    </g>
+    <g transform="translate(108,42)">
+      <circle r="3.6" fill="#E8D9A8" stroke="#B9A368" stroke-width=".4"/>
+    </g>
+  </g>
+</svg>
