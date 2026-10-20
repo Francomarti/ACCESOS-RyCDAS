@@ -126,6 +126,15 @@ button{cursor:pointer}
 .card.granos .card-txt p,.card.granos .card-ir,.card.granos .card-copiar{color:#7A6038}
 .card.granos .card-copiar:active{background:#EFE2B8}
 .card.granos .card-copiar.hecho{color:#8A6418}
+/* Stock Tandil: cielo y granito de la Piedra Movediza, igual en los dos temas */
+.card.tandil{background:#E8F0F6;border-color:#6F8899;color:#21374A}
+.card.tandil:active{background:#DAE6EF}
+.card.tandil .logo-app{border-radius:9px}
+.card.tandil .card-txt h3{color:#2B5272;font-size:17px;letter-spacing:.08em}
+.card.tandil .card-txt p,.card.tandil .card-ir,.card.tandil .card-copiar{color:#4B6375}
+.card.tandil .card-badge{color:#2B5272;border-color:#6F8899}
+.card.tandil .card-copiar:active{background:#DAE6EF}
+.card.tandil .card-copiar.hecho{color:#2B5272}
 .card-badge{display:inline-block;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--rule);border-radius:999px;padding:1px 8px;margin-top:5px}
 .card-ir{flex:none;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--muted)}
 .card-ir svg{width:17px;height:17px}
@@ -210,7 +219,7 @@ function copiar(txt){
 }
 
 function fila(app,externa){
-  return '<li class="card' + (/^(naranja|sembra|desafio|agrintel|granos)$/.test(app.estilo || '') ? ' ' + app.estilo : '') + '" data-url="' + esc(app.url) + '" role="link" tabindex="0">' +
+  return '<li class="card' + (/^(naranja|sembra|desafio|agrintel|granos|tandil)$/.test(app.estilo || '') ? ' ' + app.estilo : '') + '" data-url="' + esc(app.url) + '" role="link" tabindex="0">' +
     (app.foto ? '<img class="logo-app foto" src="' + esc(app.foto) + '" alt="" width="46" height="46">' : app.logo ? '<img class="logo-app" src="' + esc(app.logo) + '" alt="" width="62" height="42">' : '<span class="mono">' + esc(iniciales(app.nombre)) + '</span>') +
     '<div class="card-txt"><h3>' + (app.marca && app.marca.length === 2 ? '<span class="m1">' + esc(app.marca[0]) + '</span><span class="m2">' + esc(app.marca[1]) + '</span>' : esc(app.nombre)) + '</h3>' + (app.resumen ? '<p>' + esc(app.resumen) + '</p>' : '') +
     (externa ? '<span class="card-badge">Externa</span>' : (app.badge ? '<span class="card-badge">' + esc(app.badge) + '</span>' : '')) + '</div>' +
