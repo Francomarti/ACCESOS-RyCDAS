@@ -174,7 +174,7 @@ noscript p{padding:20px}
 
   <div class="seccion" id="seccionOtros" hidden>
     <h2>Otros accesos del equipo</h2>
-    <p class="desc muted">No son nuestras, tienen su propio inicio de sesión.</p>
+    <p class="desc muted">Tienen su propia clave o inicio de sesión, aparte de este portal.</p>
     <ul class="grid" id="gridOtros"></ul>
   </div>
 
@@ -222,7 +222,7 @@ function fila(app,externa){
   return '<li class="card' + (/^(naranja|sembra|desafio|agrintel|granos|tandil)$/.test(app.estilo || '') ? ' ' + app.estilo : '') + '" data-url="' + esc(app.url) + '" role="link" tabindex="0">' +
     (app.foto ? '<img class="logo-app foto" src="' + esc(app.foto) + '" alt="" width="46" height="46">' : app.logo ? '<img class="logo-app" src="' + esc(app.logo) + '" alt="" width="62" height="42">' : '<span class="mono">' + esc(iniciales(app.nombre)) + '</span>') +
     '<div class="card-txt"><h3>' + (app.marca && app.marca.length === 2 ? '<span class="m1">' + esc(app.marca[0]) + '</span><span class="m2">' + esc(app.marca[1]) + '</span>' : esc(app.nombre)) + '</h3>' + (app.resumen ? '<p>' + esc(app.resumen) + '</p>' : '') +
-    (externa ? '<span class="card-badge">Externa</span>' : (app.badge ? '<span class="card-badge">' + esc(app.badge) + '</span>' : '')) + '</div>' +
+    (app.badge ? '<span class="card-badge">' + esc(app.badge) + '</span>' : (externa ? '<span class="card-badge">Externa</span>' : '')) + '</div>' +
     '<button class="card-copiar" type="button" data-url="' + esc(app.url) + '" aria-label="Copiar link de ' + esc(app.nombre) + '">' + ICONO_COPIAR + '</button>' +
     '<span class="card-ir" aria-hidden="true">' + ICONO_IR + '</span>' +
   '</li>';

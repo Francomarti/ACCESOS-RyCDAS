@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="author" content="Ing. Agr. Franco Martignoni (MP 4749)">
+<!-- © 2026 Ing. Agr. Franco Martignoni, MP 4749. Todos los derechos reservados. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Soja Pricing · RyCDAS</title>
+<meta name="description" content="Precio de la bolsa de semilla de soja de 40 kg. Con clave.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#f2f4ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101511" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Soja Pricing">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Saira+Stencil+One&display=swap">
+<style>
+/* Layout: planilla de supuestos a la izquierda, rótulo de la bolsa (precio) fijo a la derecha, matriz de sensibilidad al pie. */
+:root {
+  --bg: #f2f4ee;
+  --surface: #fbfcf8;
+  --ink: #17221a;
+  --ink-2: #4a594d;
+  --muted: #6f7c72;
+  --line: #d8ded1;
+  --line-strong: #b4bdae;
+  --accent: #93600e;
+  --accent-ink: #fbfcf8;
+  --accent-soft: #f0e2c2;
+  --gain: #3a7335;
+  --warn: #a4432a;
+  --bar-grain: #5b695e;
+  --bar-cost: #9aa69b;
+  --heat-lo: #fbfcf8;
+  --heat-hi: #d39b3b;
+  --heat-ink: #17221a;
+  --heat-ink-hi: #17221a;
+  --display: "Saira Stencil One", "Arial Narrow", Impact, sans-serif;
+  --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101511;
+    --surface: #172019;
+    --ink: #e6ebe2;
+    --ink-2: #b2bdb1;
+    --muted: #87938a;
+    --line: #2a352c;
+    --line-strong: #44514a;
+    --accent: #e0a94a;
+    --accent-ink: #1a1408;
+    --accent-soft: #3a2f17;
+    --gain: #7fbf73;
+    --warn: #ec8d6e;
+    --bar-grain: #b8c4b9;
+    --bar-cost: #6f7d72;
+    --heat-lo: #172019;
+    --heat-hi: #e0a94a;
+    --heat-ink: #e6ebe2;
+    --heat-ink-hi: #161b14;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101511;
+  --surface: #172019;
+  --ink: #e6ebe2;
+  --ink-2: #b2bdb1;
+  --muted: #87938a;
+  --line: #2a352c;
+  --line-strong: #44514a;
+  --accent: #e0a94a;
+  --accent-ink: #1a1408;
+  --accent-soft: #3a2f17;
+  --gain: #7fbf73;
+  --warn: #ec8d6e;
+  --bar-grain: #b8c4b9;
+  --bar-cost: #6f7d72;
+  --heat-lo: #172019;
+  --heat-hi: #e0a94a;
+  --heat-ink: #e6ebe2;
+  --heat-ink-hi: #161b14;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  margin: 0;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Encabezado */
+.top { padding-block: 18px 28px; }
+
+/* Barra superior y clave */
+.barra { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 14px 0; }
+.volver { display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); text-decoration: none; }
+.volver svg { width: 16px; height: 16px; }
+.btn-salir { border: 1px solid var(--line-strong); background: none; border-radius: 999px; padding: 5px 12px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
+.gate { max-width: 440px; margin-bottom: 56px; }
+.gate-body { padding: 20px; display: grid; gap: 10px; }
+.gate h2 { margin: 0; font-size: 18px; font-weight: 700; }
+.gate .campo { font-size: 13px; font-weight: 600; margin-top: 6px; }
+.gate input[type="password"] { width: 100%; font-size: 16px; padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--bg); }
+.btn-entrar { margin-top: 6px; border: 0; border-radius: 8px; padding: 12px 16px; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 15px; cursor: pointer; }
+.btn-entrar[disabled] { opacity: .7; cursor: progress; }
+.error { margin: 0; min-height: 1.3em; color: var(--warn); font-weight: 600; font-size: 14px; }
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+h1 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(34px, 5.4vw, 58px);
+  line-height: 1;
+  letter-spacing: .01em;
+  margin: 0;
+  text-wrap: balance;
+}
+.lede { max-width: 62ch; color: var(--ink-2); margin: 14px 0 0; font-size: 16px; }
+
+/* Grilla principal */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 36px;
+  align-items: start;
+  padding-bottom: 32px;
+}
+.inputs { display: grid; gap: 8px; min-width: 0; }
+.tag-col { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); min-width: 0; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .tag-col { position: static; order: -1; }
+}
+
+/* Secciones de supuestos */
+.sec {
+  border-top: 1.5px solid var(--ink);
+  padding-block: 14px 26px;
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.sec-head { display: grid; gap: 4px; }
+.sec h2 {
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.sec-note { color: var(--ink-2); font-size: 14px; margin: 0; max-width: 62ch; }
+
+.field { display: grid; gap: 6px; min-width: 0; }
+.field-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.field-head label, .field-head .lbl { font-weight: 600; }
+.src { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.help { font-size: 13px; color: var(--ink-2); margin: 0; max-width: 64ch; }
+.ctl { display: grid; grid-template-columns: minmax(0, 1fr) 156px; gap: 16px; align-items: center; }
+@media (max-width: 480px) { .ctl { grid-template-columns: minmax(0, 1fr) 128px; gap: 12px; } }
+input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; }
+
+.numwrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  min-width: 0;
+}
+.numwrap:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+.numwrap.bad { border-color: var(--warn); }
+.num {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: right;
+  padding: 8px 6px 8px 10px;
+}
+.num:focus { outline: none; }
+.unit { font-family: var(--mono); font-size: 11px; color: var(--muted); padding-right: 10px; white-space: nowrap; }
+
+.derived {
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--accent-soft);
+  border-radius: 6px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.derived b { font-weight: 700; }
+
+/* Selector de modo */
+.seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  justify-self: start;
+}
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label { padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--ink-2); }
+.seg input:checked + label { background: var(--ink); color: var(--surface); }
+.seg input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.fij { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 560px) { .fij { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.fij label { display: block; font-size: 12px; color: var(--ink-2); margin-bottom: 4px; }
+
+/* Listas de costos y bonificaciones */
+.items { display: grid; }
+.item {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 132px 28px;
+  gap: 10px;
+  align-items: center;
+  padding-block: 7px;
+  border-bottom: 1px dashed var(--line);
+}
+.item input[type="checkbox"] { width: 17px; height: 17px; margin: 0; accent-color: var(--accent); }
+.iname-cell { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; min-width: 0; }
+.iname-cell label { cursor: pointer; }
+.item.off .iname-cell label, .item.off .num { color: var(--muted); }
+.iname-input {
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  background: transparent;
+  padding: 3px 0;
+  min-width: 0;
+  width: 100%;
+}
+.rm {
+  width: 28px; height: 28px;
+  border: 0; border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px; line-height: 1;
+  cursor: pointer;
+}
+.rm:hover { color: var(--warn); background: var(--accent-soft); }
+.list-foot { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.add {
+  font-weight: 600; font-size: 13px;
+  color: var(--accent);
+  background: transparent;
+  border: 1px dashed var(--accent);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.add:hover { background: var(--accent-soft); }
+.total { font-weight: 700; font-variant-numeric: tabular-nums; }
+.check { display: flex; gap: 10px; align-items: flex-start; }
+.check input { width: 17px; height: 17px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+.check label { font-weight: 600; cursor: pointer; }
+
+/* Resultados de campaña */
+.figs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 18px; }
+@media (max-width: 560px) { .figs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.fig { display: grid; gap: 2px; align-content: start; min-width: 0; }
+.fig span { font-size: 12px; color: var(--muted); }
+.fig b { font-size: 19px; font-variant-numeric: tabular-nums; }
+
+/* Referencias (gráfico de puntos) */
+.dots { display: grid; gap: 8px; }
+.dot-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 76px; gap: 12px; align-items: center; }
+@media (max-width: 480px) { .dot-row { grid-template-columns: 104px minmax(0, 1fr) 62px; gap: 8px; } }
+.dot-row .dl { font-size: 13px; line-height: 1.25; }
+.dot-row .dl .src { display: block; }
+.track { position: relative; height: 20px; }
+.track::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--line); }
+.dot {
+  position: absolute; top: 50%;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+.dot.big { width: 15px; height: 15px; }
+.dv { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; font-size: 14px; }
+.ticks { position: relative; height: 16px; font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.ticks span { position: absolute; top: 0; transform: translateX(-50%); }
+.ticks span::before { content: ""; position: absolute; left: 50%; top: -6px; height: 4px; border-left: 1px solid var(--line-strong); }
+
+/* Rótulo de la bolsa */
+.tag {
+  background: var(--surface);
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.tag-top {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 18px;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.hole { width: 16px; height: 16px; border-radius: 50%; background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--ink); flex: none; }
+.tag-top .kind { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+.tag-main { padding: 18px 20px 16px; display: grid; gap: 8px; }
+.price-label { margin: 0; font-size: 13px; color: var(--ink-2); }
+.price {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(52px, 7vw, 68px);
+  line-height: .95;
+  font-variant-numeric: tabular-nums;
+}
+.price small { font-family: var(--body); font-weight: 700; font-size: 18px; letter-spacing: .04em; margin-right: 6px; vertical-align: .9em; }
+.iva { margin: 0; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.chip {
+  justify-self: start;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+.chip.up { color: var(--warn); background: color-mix(in oklab, var(--warn) 13%, transparent); }
+.chip.down { color: var(--gain); background: color-mix(in oklab, var(--gain) 14%, transparent); }
+.chip.eq { color: var(--ink-2); background: var(--accent-soft); }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; padding: 14px 20px; border-top: 1px solid var(--line); margin: 0; }
+.stats div { min-width: 0; }
+.stats dt { font-size: 12px; color: var(--muted); }
+.stats dd { margin: 2px 0 0; font-weight: 700; font-size: 18px; font-variant-numeric: tabular-nums; }
+.perf { border: 0; border-top: 2px dashed var(--line-strong); margin: 0 14px; }
+.bd { padding: 14px 20px 18px; display: grid; gap: 7px; }
+#bd { display: grid; gap: 10px; }
+.bd h3 { margin: 0 0 4px; font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2); }
+.bd-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; align-items: baseline; font-size: 14px; font-variant-numeric: tabular-nums; }
+.bd-row small { color: var(--muted); font-size: 11px; font-family: var(--mono); }
+.bd-bar { grid-column: 1 / -1; height: 5px; }
+.bd-bar i { display: block; height: 100%; border-radius: 0 3px 3px 0; min-width: 2px; }
+.bd-sub { border-top: 1px solid var(--line); padding-top: 7px; font-weight: 700; }
+.bd-total { border-top: 1.5px solid var(--ink); padding-top: 8px; font-weight: 700; font-size: 16px; }
+.neg { color: var(--gain); }
+.tag-foot { font-family: var(--mono); font-size: 11px; color: var(--muted); padding: 10px 20px; border-top: 1px solid var(--line); }
+
+/* Sensibilidad */
+.sens { padding-bottom: 28px; display: grid; gap: 14px; }
+.sens h2 { font-family: var(--display); font-weight: 400; font-size: clamp(24px, 3.4vw, 32px); margin: 0; line-height: 1.05; text-wrap: balance; }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: separate; border-spacing: 2px; width: 100%; min-width: 560px; font-variant-numeric: tabular-nums; }
+caption { text-align: left; padding: 12px 12px 6px; font-size: 13px; color: var(--ink-2); }
+th, td { padding: 10px 8px; text-align: center; font-size: 14px; border-radius: 4px; }
+thead th { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--muted); }
+tbody th { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--muted); text-align: left; white-space: nowrap; }
+th.cur { color: var(--ink); font-weight: 700; }
+td { font-weight: 600; color: var(--heat-ink); cursor: default; }
+td.hot { color: var(--heat-ink-hi); }
+td.cur { box-shadow: inset 0 0 0 2px var(--ink); }
+td:hover { box-shadow: inset 0 0 0 2px var(--accent); }
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.ramp { width: 140px; height: 10px; border-radius: 3px; background: linear-gradient(90deg, var(--heat-lo), var(--heat-hi)); border: 1px solid var(--line); }
+.cur-key { display: inline-block; width: 14px; height: 14px; border-radius: 3px; box-shadow: inset 0 0 0 2px var(--ink); vertical-align: -2px; margin-right: 4px; }
+
+/* Pie */
+.foot {
+  display: flex; flex-wrap: wrap; gap: 12px 20px;
+  align-items: center; justify-content: space-between;
+  padding-block: 20px 44px;
+  border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 13px;
+}
+.btn {
+  font-weight: 600;
+  border: 1px solid var(--ink);
+  background: transparent;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+.btn:hover { background: var(--accent-soft); }
+.btn.armed { background: var(--warn); border-color: var(--warn); color: var(--surface); }
+
+/* Barra con el precio en el teléfono */
+.mini {
+  position: fixed; left: 0; right: 0; top: 0; z-index: 20;
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+  background: var(--ink);
+  color: var(--bg);
+  font-variant-numeric: tabular-nums;
+  transform: translateY(-110%);
+  transition: transform .2s ease;
+}
+.mini.show { transform: none; }
+.mini b { font-family: var(--display); font-weight: 400; font-size: 24px; }
+.mini span { font-size: 13px; opacity: .8; }
+@media (min-width: 901px) { .mini { display: none; } }
+@media (prefers-reduced-motion: reduce) { .mini { transition: none; } }
+</style>
+
+</head>
+<body>
+<div class="mini" id="mini" aria-hidden="true">
+  <b id="mini-price"></b>
+  <span id="mini-cost"></span>
+</div>
+
+<div class="barra wrap">
+  <a class="volver" href="../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>Accesos</a>
+  <button class="btn-salir" id="btnSalir" type="button" hidden>Cerrar sesión</button>
+</div>
+
+<header class="top wrap">
+  <p class="eyebrow">Soja Pricing · Hoja2</p>
+  <h1>Precio de la bolsa de semilla</h1>
+  <p class="lede">Mové cualquier número y el precio se recalcula al instante. Los valores de arranque son los de la planilla, y cada uno dice de qué celda sale.</p>
+</header>
+
+<div class="wrap">
+  <form class="gate tag" id="bloqueo" autocomplete="on">
+    <div class="tag-top"><span class="hole" aria-hidden="true"></span><span class="kind">Con clave</span></div>
+    <div class="gate-body">
+      <h2>Precios y costos internos</h2>
+      <p class="help">Pedile la clave a Franco.</p>
+      <input type="text" name="username" value="soja-pricing" autocomplete="username" hidden>
+      <label class="campo" for="clave">Clave</label>
+      <input type="password" id="clave" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+      <div class="check"><input type="checkbox" id="recordar" checked><label for="recordar">Recordar en este dispositivo</label></div>
+      <button class="btn-entrar" id="btnEntrar" type="submit">Entrar</button>
+      <p class="error" id="error" aria-live="polite"></p>
+    </div>
+  </form>
+</div>
+
+<div id="app" hidden>
+<main class="layout wrap">
+  <div class="inputs">
+
+    <section class="sec" aria-labelledby="h-grano">
+      <div class="sec-head">
+        <h2 id="h-grano">Grano y rendimiento de semilla</h2>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <span class="lbl" id="lbl-modo">Precio de la soja</span>
+          <span class="src">Hoja2 C5 · contrato L2:M6</span>
+        </div>
+        <div class="seg" role="radiogroup" aria-labelledby="lbl-modo">
+          <input type="radio" name="modo" id="modo-hoy" value="hoy" data-key="modo">
+          <label for="modo-hoy">Soja de hoy</label>
+          <input type="radio" name="modo" id="modo-fij" value="fij" data-key="modo">
+          <label for="modo-fij">Promedio de 4 fijaciones</label>
+        </div>
+      </div>
+
+      <div class="field" id="blk-hoy">
+        <div class="field-head">
+          <label for="f-soja">Soja de hoy</label>
+          <span class="src">Hoja2 C5</span>
+        </div>
+        <div class="ctl">
+          <input type="range" id="r-soja" data-key="soja" min="200" max="600" step="1" aria-label="Soja de hoy, control deslizante">
+          <div class="numwrap"><input id="f-soja" class="num" data-key="soja" data-dec="0" data-min="1" inputmode="decimal" autocomplete="off"><span class="unit">USD/t</span></div>
+        </div>
+      </div>
+
+      <div class="field" id="blk-fij" hidden>
+        <div class="fij">
+          <div><label for="f-fij0">Abril</label><div class="numwrap"><input id="f-fij0" class="num" data-key="fij.0" data-dec="0" data-min="0" inputmode="decimal" autocomplete="off"><span class="unit">USD/t</span></div></div>
+          <div><label for="f-fij1">Mayo</label><div class="numwrap"><input id="f-fij1" class="num" data-key="fij.1" data-dec="0" data-min="0" inputmode="decimal" autocomplete="off"><span class="unit">USD/t</span></div></div>
+          <div><label for="f-fij2">Septiembre</label><div class="numwrap"><input id="f-fij2" class="num" data-key="fij.2" data-dec="0" data-min="0" inputmode="decimal" autocomplete="off"><span class="unit">USD/t</span></div></div>
+          <div><label for="f-fij3">Noviembre</label><div class="numwrap"><input id="f-fij3" class="num" data-key="fij.3" data-dec="0" data-min="0" inputmode="decimal" autocomplete="off"><span class="unit">USD/t</span></div></div>
+        </div>
+        <p class="help" id="d-prom"></p>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label for="f-rend">Rendimiento de semilla</label>
+          <span class="src">Hoja2 D11</span>
+        </div>
+        <div class="ctl">
+          <input type="range" id="r-rend" data-key="rend" min="50" max="100" step="0.5" aria-label="Rendimiento de semilla, control deslizante">
+          <div class="numwrap"><input id="f-rend" class="num" data-key="rend" data-dec="1" data-min="1" data-max="100" inputmode="decimal" autocomplete="off"><span class="unit">%</span></div>
+        </div>
+        <p class="help">Qué parte del grano queda como semilla después de clasificar. El resto es descarte.</p>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label for="f-desc">Valor del descarte</label>
+          <span class="src">Hoja2 D13 / I2</span>
+        </div>
+        <div class="ctl">
+          <input type="range" id="r-desc" data-key="descarte" min="0" max="100" step="5" aria-label="Valor del descarte, control deslizante">
+          <div class="numwrap"><input id="f-desc" class="num" data-key="descarte" data-dec="0" data-min="0" data-max="100" inputmode="decimal" autocomplete="off"><span class="unit">% soja</span></div>
+        </div>
+        <p class="help">0 % si el descarte no se vende (como D13). 100 % si se vende a precio de grano (como I2, que divide por 25 bolsas).</p>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label for="f-peso">Peso de la bolsa</label>
+          <span class="src">Hoja2 J5</span>
+        </div>
+        <div class="ctl">
+          <span></span>
+          <div class="numwrap"><input id="f-peso" class="num" data-key="peso" data-dec="0" data-min="1" inputmode="decimal" autocomplete="off"><span class="unit">kg</span></div>
+        </div>
+      </div>
+
+      <p class="derived" id="d-grano"></p>
+    </section>
+
+    <section class="sec" aria-labelledby="h-lote">
+      <div class="sec-head">
+        <h2 id="h-lote">Rendimiento del lote</h2>
+        <p class="sec-note">El rinde por hectárea mueve el precio solo si tenés costos por hectárea. Si no, define cuántas bolsas saca cada hectárea y cuánto ganás por hectárea.</p>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label for="f-kgha">Rendimiento del lote</label>
+          <span class="src">Ejemplo · no está en la planilla</span>
+        </div>
+        <div class="ctl">
+          <input type="range" id="r-kgha" data-key="kgha" min="1000" max="6000" step="50" aria-label="Rendimiento del lote, control deslizante">
+          <div class="numwrap"><input id="f-kgha" class="num" data-key="kgha" data-dec="0" data-min="0" inputmode="decimal" autocomplete="off"><span class="unit">kg/ha</span></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label for="f-costoha">Costos por hectárea</label>
+          <span class="src">Opcional</span>
+        </div>
+        <div class="ctl">
+          <input type="range" id="r-costoha" data-key="costoHa" min="0" max="1000" step="10" aria-label="Costos por hectárea, control deslizante">
+          <div class="numwrap"><input id="f-costoha" class="num" data-key="costoHa" data-dec="0" data-min="0" inputmode="decimal" autocomplete="off"><span class="unit">USD/ha</span></div>
+        </div>
+        <p class="help">Lo que pagues por hectárea, por ejemplo un premio al productor o la inspección del lote. Se reparte entre las bolsas de cada hectárea, así que con más rinde baja el costo por bolsa.</p>
+      </div>
+
+      <p class="derived" id="d-lote"></p>
+    </section>
+
+    <section class="sec" aria-labelledby="h-costos">
+      <div class="sec-head">
+        <h2 id="h-costos">Costos por bolsa</h2>
+        <p class="sec-note">Tildá los que entran en el precio. Los que vienen destildados están en la planilla pero no en la suma de la Hoja2.</p>
+      </div>
+      <div class="items" id="list-costos"></div>
+      <div class="list-foot">
+        <button type="button" class="add" id="add-costos">+ Agregar costo</button>
+        <span class="total" id="t-costos"></span>
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="h-bonif">
+      <div class="sec-head">
+        <h2 id="h-bonif">Bonificaciones</h2>
+        <p class="sec-note">Lo que cobrás por bolsa además del precio de venta.</p>
+      </div>
+      <div class="items" id="list-bonif"></div>
+      <div class="list-foot">
+        <button type="button" class="add" id="add-bonif">+ Agregar bonificación</button>
+        <span class="total" id="t-bonif"></span>
+      </div>
+      <div class="check">
+        <input type="checkbox" id="f-descontar" data-key="descontar">
+        <div>
+          <label for="f-descontar">Descontar las bonificaciones del precio</label>
+          <p class="help">Si las trasladás al cliente, el precio baja. Si no, quedan como ganancia extra.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="h-margen">
+      <div class="sec-head">
+        <h2 id="h-margen">Margen e IVA</h2>
+      </div>
+      <div class="field">
+        <div class="field-head">
+          <label for="f-margen">Margen sobre el precio de venta</label>
+          <span class="src">Hoja1 D31</span>
+        </div>
+        <div class="ctl">
+          <input type="range" id="r-margen" data-key="margen" min="0" max="40" step="0.5" aria-label="Margen, control deslizante">
+          <div class="numwrap"><input id="f-margen" class="num" data-key="margen" data-dec="1" data-min="0" data-max="95" inputmode="decimal" autocomplete="off"><span class="unit">%</span></div>
+        </div>
+        <p class="help">Precio = costo ÷ (1 − margen), igual que en la Hoja1.</p>
+      </div>
+      <div class="field">
+        <div class="field-head">
+          <label for="f-iva">IVA</label>
+          <span class="src">Hoja1 B21</span>
+        </div>
+        <div class="ctl">
+          <p class="help">Solo cambia el precio con IVA.</p>
+          <div class="numwrap"><input id="f-iva" class="num" data-key="iva" data-dec="1" data-min="0" inputmode="decimal" autocomplete="off"><span class="unit">%</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="h-camp">
+      <div class="sec-head">
+        <h2 id="h-camp">Campaña</h2>
+      </div>
+      <div class="field">
+        <div class="field-head">
+          <label for="f-bolsas">Bolsas a vender</label>
+          <span class="src">Hoja1 E13</span>
+        </div>
+        <div class="ctl">
+          <p class="help">Las que pensás vender en la campaña.</p>
+          <div class="numwrap"><input id="f-bolsas" class="num" data-key="bolsas" data-dec="0" data-min="0" inputmode="decimal" autocomplete="off"><span class="unit">bolsas</span></div>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-head">
+          <label for="f-dens">Bolsas de siembra por hectárea</label>
+          <span class="src">Hoja2 B4</span>
+        </div>
+        <div class="ctl">
+          <p class="help">Las que usa el productor para sembrar una hectárea. Con este dato se calcula cuánto ahorra frente a la semilla original.</p>
+          <div class="numwrap"><input id="f-dens" class="num" data-key="densidad" data-dec="2" data-min="0" inputmode="decimal" autocomplete="off"><span class="unit">bls/ha</span></div>
+        </div>
+      </div>
+      <div class="figs" id="figs"></div>
+    </section>
+
+    <section class="sec" aria-labelledby="h-ref">
+      <div class="sec-head">
+        <h2 id="h-ref">Referencias de mercado</h2>
+      </div>
+      <div class="fij" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+        <div><label for="f-reforig">Semilla original · Hoja2 B1</label><div class="numwrap"><input id="f-reforig" class="num" data-key="refOrig" data-dec="2" data-min="0" inputmode="decimal" autocomplete="off"><span class="unit">USD</span></div></div>
+        <div><label for="f-refmult">1ra multiplicación · Hoja2 B2</label><div class="numwrap"><input id="f-refmult" class="num" data-key="refMult" data-dec="2" data-min="0" inputmode="decimal" autocomplete="off"><span class="unit">USD</span></div></div>
+      </div>
+      <div class="dots" id="dots" role="img" aria-label="Comparación de tu precio con las referencias de mercado"></div>
+      <p class="help" id="d-ref"></p>
+    </section>
+  </div>
+
+  <aside class="tag-col" aria-label="Resultado">
+    <div class="tag" id="tag">
+      <div class="tag-top"><span class="hole" aria-hidden="true"></span><span class="kind" id="tag-kind">Bolsa</span></div>
+      <div class="tag-main">
+        <p class="price-label">Precio sugerido por bolsa, sin IVA</p>
+        <p class="price" id="o-precio"></p>
+        <p class="iva" id="o-iva"></p>
+        <span class="chip eq" id="o-chip"></span>
+      </div>
+      <dl class="stats">
+        <div><dt>Costo por bolsa</dt><dd id="o-costo"></dd></div>
+        <div><dt id="o-margen-l">Margen</dt><dd id="o-margen"></dd></div>
+        <div><dt>Bonificaciones</dt><dd id="o-bonif"></dd></div>
+        <div><dt>Ganancia por bolsa</dt><dd id="o-gan"></dd></div>
+      </dl>
+      <hr class="perf">
+      <div class="bd">
+        <h3>Cómo se arma el precio</h3>
+        <div id="bd"></div>
+      </div>
+      <div class="tag-foot" id="tag-foot"></div>
+    </div>
+  </aside>
+</main>
+
+<section class="sens wrap" aria-labelledby="h-sens">
+  <h2 id="h-sens">Precio por bolsa según soja y rendimiento de semilla</h2>
+  <p class="help" id="sens-note">USD por bolsa, sin IVA. Columnas: precio de la soja (USD/t). Filas: rendimiento de semilla. Todo lo demás queda como está arriba.</p>
+  <div class="tbl-wrap">
+    <table id="sens" aria-labelledby="h-sens" aria-describedby="sens-note">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div class="legend" id="legend"></div>
+</section>
+
+<footer class="foot wrap">
+  <span>Tus cambios quedan guardados en este dispositivo hasta que cierres sesión.</span>
+  <button type="button" class="btn" id="reset">Volver a los valores de la planilla</button>
+</footer>
+</div>
+
+<script>
+(function () {
+  const KEY = 'rycdas-soja-pricing';            // clave derivada, si eligió recordarla
+  const LS_KEY = 'rycdas-soja-pricing-estado';  // números que fue tocando
+  let DEFAULTS = null;                          // valores de la planilla: vienen cifrados en datos.json
+
+  const clone = (o) => JSON.parse(JSON.stringify(o));
+  let S = null;
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved && saved.v === 1 && saved.base === DEFAULTS.version && saved.data) return Object.assign(clone(DEFAULTS), saved.data);
+      }
+    } catch (e) { /* sin almacenamiento: arranca con la planilla */ }
+    return clone(DEFAULTS);
+  }
+  function save() {
+    try { localStorage.setItem(LS_KEY, JSON.stringify({ v: 1, base: DEFAULTS.version, data: S })); } catch (e) { /* ignorado */ }
+  }
+
+  // Números en formato argentino
+  const NF = {};
+  function fmt(n, d = 2) {
+    if (!Number.isFinite(n)) return '—';
+    if (Math.abs(n) < 0.5 * Math.pow(10, -d)) n = 0;
+    const f = NF[d] || (NF[d] = new Intl.NumberFormat('es-AR', { minimumFractionDigits: d, maximumFractionDigits: d }));
+    return f.format(n);
+  }
+  const usd = (n, d = 2) => 'USD ' + fmt(n, d);
+  const pct = (n) => fmt(n, Number.isInteger(n) ? 0 : 1) + ' %';
+  const n1 = (n) => fmt(n, Math.abs(n - Math.round(n)) < 0.05 ? 0 : 1);
+  function parseNum(str) {
+    let t = String(str).trim().replace(/\s|usd|%/gi, '');
+    if (!t) return NaN;
+    if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+    else if (/^-?[1-9]\d{0,2}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, '');
+    const n = Number(t);
+    return Number.isFinite(n) ? n : NaN;
+  }
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const sum = (a) => a.reduce((x, y) => x + (Number.isFinite(y) ? y : 0), 0);
+  const getPath = (o, k) => k.split('.').reduce((x, p) => (x == null ? x : x[p]), o);
+  function setPath(o, k, v) {
+    const parts = k.split('.');
+    const last = parts.pop();
+    const tgt = parts.reduce((x, p) => x[p], o);
+    tgt[last] = v;
+  }
+
+  function sojaEfectiva(s) {
+    return s.modo === 'fij' ? sum(s.fij) / s.fij.length : s.soja;
+  }
+
+  // Modelo: mismo cálculo que la Hoja2, con el grano tomado de D13 (soja ÷ bolsas por tonelada)
+  function compute(s, o = {}) {
+    const soja = o.soja != null ? o.soja : sojaEfectiva(s);
+    const rend = Math.min(Math.max(o.rend != null ? o.rend : s.rend, 1), 100) / 100;
+    const peso = Math.max(s.peso, 1);
+    const bolsasTn = 1000 * rend / peso;
+    const descKg = 1000 * (1 - rend);
+    const valorDesc = (descKg / 1000) * soja * (s.descarte / 100);
+    const grano = (soja - valorDesc) / bolsasTn;
+    const bolsasHa = s.kgha * rend / peso;
+    const porHa = s.costoHa > 0 && bolsasHa > 0 ? s.costoHa / bolsasHa : 0;
+    const otros = sum(s.costos.filter((c) => c.on).map((c) => c.v));
+    const costo = grano + otros + porHa;
+    const bonif = sum(s.bonif.filter((b) => b.on).map((b) => b.v));
+    const base = s.descontar ? costo - bonif : costo;
+    const m = Math.min(Math.max(s.margen, 0), 95) / 100;
+    const precio = base / (1 - m);
+    const margenUsd = precio - base;
+    const ganancia = precio - costo + bonif;
+    const conIva = precio * (1 + s.iva / 100);
+    return { soja, rend, peso, bolsasTn, descKg, valorDesc, grano, bolsasHa, porHa, otros, costo, bonif, base, precio, margenUsd, ganancia, conIva };
+  }
+
+  // Campos simples
+  const scalarEls = Array.from(document.querySelectorAll('[data-key]'));
+  function syncScalars(except) {
+    scalarEls.forEach((el) => {
+      if (el === except) return;
+      const v = getPath(S, el.dataset.key);
+      if (el.type === 'checkbox') el.checked = !!v;
+      else if (el.type === 'radio') el.checked = el.value === v;
+      else if (el.type === 'range') el.value = v;
+      else el.value = fmt(v, +el.dataset.dec || 0);
+    });
+  }
+  function clampFor(el, v) {
+    if (el.dataset.min != null && v < +el.dataset.min) v = +el.dataset.min;
+    if (el.dataset.max != null && v > +el.dataset.max) v = +el.dataset.max;
+    return v;
+  }
+  scalarEls.forEach((el) => {
+    const isToggle = el.type === 'checkbox' || el.type === 'radio';
+    el.addEventListener(isToggle ? 'change' : 'input', () => {
+      const key = el.dataset.key;
+      let v;
+      if (el.type === 'checkbox') v = el.checked;
+      else if (el.type === 'radio') { if (!el.checked) return; v = el.value; }
+      else if (el.type === 'range') v = Number(el.value);
+      else {
+        const wrap = el.closest('.numwrap');
+        v = parseNum(el.value);
+        if (!Number.isFinite(v)) { if (wrap) wrap.classList.add('bad'); return; }
+        if (wrap) wrap.classList.remove('bad');
+        v = clampFor(el, v);
+      }
+      setPath(S, key, v);
+      syncScalars(el);
+      update();
+    });
+    if (el.classList.contains('num')) {
+      el.addEventListener('blur', () => {
+        el.value = fmt(getPath(S, el.dataset.key), +el.dataset.dec || 0);
+        const wrap = el.closest('.numwrap');
+        if (wrap) wrap.classList.remove('bad');
+      });
+    }
+  });
+
+  // Listas de costos y bonificaciones
+  function renderList(kind) {
+    const box = document.getElementById('list-' + kind);
+    box.innerHTML = '';
+    S[kind].forEach((it) => {
+      const cid = 'c-' + kind + '-' + it.id;
+      const row = document.createElement('div');
+      row.className = 'item' + (it.on ? '' : ' off');
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.id = cid;
+      cb.checked = it.on;
+      cb.addEventListener('change', () => { it.on = cb.checked; row.classList.toggle('off', !it.on); update(); });
+
+      const nameCell = document.createElement('div');
+      nameCell.className = 'iname-cell';
+      if (it.custom) {
+        cb.setAttribute('aria-label', 'Incluir este concepto');
+        const nIn = document.createElement('input');
+        nIn.className = 'iname-input';
+        nIn.id = cid + '-n';
+        nIn.value = it.nombre;
+        nIn.setAttribute('aria-label', 'Nombre del concepto');
+        nIn.addEventListener('input', () => { it.nombre = nIn.value; update(); });
+        nameCell.append(nIn);
+      } else {
+        const lb = document.createElement('label');
+        lb.htmlFor = cid;
+        lb.textContent = it.nombre;
+        nameCell.append(lb);
+        if (it.src) {
+          const sp = document.createElement('span');
+          sp.className = 'src';
+          sp.textContent = it.src;
+          nameCell.append(sp);
+        }
+      }
+
+      const nw = document.createElement('div');
+      nw.className = 'numwrap';
+      const vIn = document.createElement('input');
+      vIn.className = 'num';
+      vIn.id = cid + '-v';
+      vIn.inputMode = 'decimal';
+      vIn.autocomplete = 'off';
+      vIn.value = fmt(it.v, 2);
+      vIn.setAttribute('aria-label', (it.nombre || 'Concepto') + ', USD por bolsa');
+      vIn.addEventListener('input', () => {
+        const v = parseNum(vIn.value);
+        if (!Number.isFinite(v)) { nw.classList.add('bad'); return; }
+        nw.classList.remove('bad');
+        it.v = v;
+        update();
+      });
+      vIn.addEventListener('blur', () => { vIn.value = fmt(it.v, 2); nw.classList.remove('bad'); });
+      const u = document.createElement('span');
+      u.className = 'unit';
+      u.textContent = 'USD';
+      nw.append(vIn, u);
+
+      row.append(cb, nameCell, nw);
+      if (it.custom) {
+        const rm = document.createElement('button');
+        rm.type = 'button';
+        rm.className = 'rm';
+        rm.textContent = '×';
+        rm.setAttribute('aria-label', 'Quitar ' + (it.nombre || 'concepto'));
+        rm.addEventListener('click', () => {
+          S[kind].splice(S[kind].indexOf(it), 1);
+          renderList(kind);
+          update();
+        });
+        row.append(rm);
+      } else {
+        row.append(document.createElement('span'));
+      }
+      box.append(row);
+    });
+  }
+  function addItem(kind, nombre) {
+    const it = { id: 'x' + Date.now().toString(36), nombre, v: 0, on: true, custom: true };
+    S[kind].push(it);
+    renderList(kind);
+    update();
+    const nIn = document.getElementById('c-' + kind + '-' + it.id + '-n');
+    if (nIn) { nIn.focus(); nIn.select(); }
+  }
+  document.getElementById('add-costos').addEventListener('click', () => addItem('costos', 'Nuevo costo'));
+  document.getElementById('add-bonif').addEventListener('click', () => addItem('bonif', 'Nueva bonificación'));
+
+  const $ = (id) => document.getElementById(id);
+
+  function renderBreakdown(r) {
+    const scale = Math.max(r.precio, r.costo, 0.01);
+    const bar = (label, v, color, note, cls) => {
+      const w = Math.max(0, Math.min(100, Math.abs(v) / scale * 100));
+      return '<div class="bd-row' + (cls ? ' ' + cls : '') + '"><span>' + esc(label) + (note ? ' <small>' + esc(note) + '</small>' : '') +
+        '</span><span>' + fmt(v) + '</span><span class="bd-bar"><i style="width:' + w.toFixed(2) + '%;background:' + color + '"></i></span></div>';
+    };
+    let h = bar('Grano', r.grano, 'var(--bar-grain)', fmt(r.soja, 0) + ' USD/t ÷ ' + n1(r.bolsasTn) + ' bls');
+    S.costos.filter((c) => c.on).forEach((c) => { h += bar(c.nombre || 'Sin nombre', c.v, 'var(--bar-cost)'); });
+    if (r.porHa > 0) h += bar('Costos por hectárea', r.porHa, 'var(--bar-cost)', fmt(S.costoHa, 0) + ' ÷ ' + n1(r.bolsasHa) + ' bls');
+    h += '<div class="bd-row bd-sub"><span>Costo por bolsa</span><span>' + fmt(r.costo) + '</span></div>';
+    if (S.descontar && r.bonif !== 0) h += bar('Menos bonificaciones', -r.bonif, 'var(--gain)', null, 'neg');
+    h += bar('Margen ' + pct(S.margen), r.margenUsd, 'var(--accent)');
+    h += '<div class="bd-row bd-total"><span>Precio sin IVA</span><span>' + usd(r.precio) + '</span></div>';
+    $('bd').innerHTML = h;
+  }
+
+  function renderRefs(r) {
+    const items = [
+      { l: 'Costo por bolsa', v: r.costo, c: 'var(--bar-grain)' },
+      { l: 'Tu precio', v: r.precio, c: 'var(--accent)', big: true },
+      { l: '1ra multiplicación', v: S.refMult, c: 'var(--ink-2)', src: 'Hoja2 B2' },
+      { l: 'Semilla original', v: S.refOrig, c: 'var(--ink-2)', src: 'Hoja2 B1' }
+    ];
+    const max = Math.max(...items.map((i) => i.v), 1) * 1.08;
+    const step = [5, 10, 20, 25, 50, 100, 200, 500].find((s) => max / s <= 6) || 1000;
+    const pos = (v) => Math.max(0, Math.min(100, v / max * 100));
+    let h = items.map((i) =>
+      '<div class="dot-row"><span class="dl">' + esc(i.l) + (i.src ? '<span class="src">' + i.src + '</span>' : '') + '</span>' +
+      '<span class="track"><span class="dot' + (i.big ? ' big' : '') + '" style="left:' + pos(i.v).toFixed(2) + '%;background:' + i.c + '"></span></span>' +
+      '<span class="dv">' + fmt(i.v) + '</span></div>').join('');
+    let ticks = '';
+    for (let t = 0; t <= max; t += step) ticks += '<span style="left:' + pos(t).toFixed(2) + '%">' + fmt(t, 0) + '</span>';
+    h += '<div class="dot-row" aria-hidden="true"><span></span><span class="ticks">' + ticks + '</span><span class="dv src">USD</span></div>';
+    $('dots').innerHTML = h;
+
+    const rel = (ref, name) => {
+      const d = r.precio - ref;
+      if (Math.abs(d) < 0.005) return 'igual a ' + name;
+      return usd(Math.abs(d)) + (d > 0 ? ' arriba de ' : ' abajo de ') + name;
+    };
+    $('d-ref').textContent = 'Tu precio queda ' + rel(S.refMult, 'la 1ra multiplicación') + ' y ' + rel(S.refOrig, 'la semilla original') + '.';
+  }
+
+  function renderFigs(r) {
+    const granoT = r.bolsasTn > 0 ? S.bolsas / r.bolsasTn : NaN;
+    const figs = [
+      ['Ventas de la campaña', usd(S.bolsas * r.precio, 0)],
+      ['Ganancia de la campaña', usd(S.bolsas * r.ganancia, 0)],
+      ['Grano necesario', fmt(granoT, 1) + ' t'],
+      ['Bolsas por hectárea', n1(r.bolsasHa)],
+      ['Ganancia por hectárea', usd(r.bolsasHa * r.ganancia, 0)],
+      ['Ahorro del productor por ha frente a la original', usd((S.refOrig - r.precio) * S.densidad)]
+    ];
+    $('figs').innerHTML = figs.map((f) => '<div class="fig"><span>' + f[0] + '</span><b>' + f[1] + '</b></div>').join('');
+  }
+
+  function renderSens() {
+    const soja0 = sojaEfectiva(S);
+    const rend0 = S.rend;
+    const cols = [-60, -40, -20, 0, 20, 40, 60].map((d) => ({ d, v: soja0 + d })).filter((c) => c.v > 0);
+    const rows = [-10, -5, 0, 5, 10].map((d) => ({ d, v: rend0 + d })).filter((x) => x.v > 0 && x.v <= 100);
+    const grid = rows.map((rw) => cols.map((c) => compute(S, { soja: c.v, rend: rw.v }).precio));
+    const flat = grid.flat().filter(Number.isFinite);
+    const lo = Math.min(...flat), hi = Math.max(...flat);
+    const span = hi - lo || 1;
+
+    let th = '<tr><th scope="col">Rend. \\ Soja</th>' + cols.map((c) => '<th scope="col"' + (c.d === 0 ? ' class="cur"' : '') + '>' + fmt(c.v, 0) + '</th>').join('') + '</tr>';
+    let tb = rows.map((rw, i) => '<tr><th scope="row"' + (rw.d === 0 ? ' class="cur"' : '') + '>' + pct(rw.v) + '</th>' +
+      cols.map((c, j) => {
+        const v = grid[i][j];
+        const t = (v - lo) / span;
+        const cls = [t > 0.6 ? 'hot' : '', rw.d === 0 && c.d === 0 ? 'cur' : ''].filter(Boolean).join(' ');
+        const tip = 'Soja USD ' + fmt(c.v, 0) + '/t, rendimiento ' + pct(rw.v) + ': ' + usd(v) + ' por bolsa';
+        return '<td' + (cls ? ' class="' + cls + '"' : '') + ' title="' + esc(tip) + '" style="background:color-mix(in oklab, var(--heat-lo), var(--heat-hi) ' + Math.round(t * 100) + '%)">' + fmt(v) + '</td>';
+      }).join('') + '</tr>').join('');
+    $('sens').tHead.innerHTML = th;
+    $('sens').tBodies[0].innerHTML = tb;
+    $('legend').innerHTML = '<span>' + usd(lo) + '</span><span class="ramp" aria-hidden="true"></span><span>' + usd(hi) + '</span>' +
+      '<span><span class="cur-key" aria-hidden="true"></span>Tu escenario actual</span>';
+  }
+
+  function update() {
+    const r = compute(S);
+    const prom = sojaEfectiva(S);
+
+    $('blk-hoy').hidden = S.modo === 'fij';
+    $('blk-fij').hidden = S.modo !== 'fij';
+    $('d-prom').textContent = 'Promedio de las 4 fijaciones: USD ' + fmt(prom, 0) + '/t';
+
+    $('d-grano').innerHTML = '1.000 kg de grano dan ' + n1(r.bolsasTn) + ' bolsas y ' + fmt(r.descKg, 0) + ' kg de descarte' +
+      (S.descarte > 0 ? ' (que vale ' + usd(r.valorDesc) + ')' : '') + '. Grano por bolsa: <b>' + usd(r.grano) + '</b>';
+    $('d-lote').innerHTML = 'Cada hectárea da ' + n1(r.bolsasHa) + ' bolsas. Costo por hectárea en cada bolsa: <b>' + usd(r.porHa) + '</b>';
+    $('t-costos').textContent = 'Sin grano: ' + usd(r.otros);
+    $('t-bonif').textContent = usd(r.bonif) + ' por bolsa';
+
+    $('tag-kind').textContent = 'Bolsa · ' + fmt(r.peso, 0) + ' kg';
+    $('o-precio').innerHTML = '<small>USD</small>' + fmt(r.precio);
+    $('o-iva').textContent = 'Con IVA (' + pct(S.iva) + '): ' + usd(r.conIva);
+    const d = r.precio - S.refMult;
+    const chip = $('o-chip');
+    if (Math.abs(d) < 0.005) { chip.className = 'chip eq'; chip.textContent = '= Igual a la 1ra multiplicación'; }
+    else if (d > 0) { chip.className = 'chip up'; chip.textContent = '▲ ' + usd(d) + ' arriba de la 1ra multiplicación'; }
+    else { chip.className = 'chip down'; chip.textContent = '▼ ' + usd(-d) + ' abajo de la 1ra multiplicación'; }
+    $('o-costo').textContent = usd(r.costo);
+    $('o-margen-l').textContent = 'Margen ' + pct(S.margen);
+    $('o-margen').textContent = usd(r.margenUsd);
+    $('o-bonif').textContent = usd(r.bonif) + (S.descontar ? ' (al cliente)' : '');
+    $('o-gan').textContent = usd(r.ganancia);
+    $('tag-foot').textContent = 'Soja ' + fmt(r.soja, 0) + ' USD/t · semilla ' + pct(S.rend) + ' · lote ' + fmt(S.kgha, 0) + ' kg/ha';
+    $('mini-price').textContent = usd(r.precio);
+    $('mini-cost').textContent = 'Costo ' + usd(r.costo);
+
+    renderBreakdown(r);
+    renderRefs(r);
+    renderFigs(r);
+    renderSens();
+    save();
+  }
+
+  // Volver a la planilla, con confirmación en el mismo botón
+  const resetBtn = $('reset');
+  const resetLabel = resetBtn.textContent;
+  let armed = false, armTimer;
+  resetBtn.addEventListener('click', () => {
+    if (!armed) {
+      armed = true;
+      resetBtn.classList.add('armed');
+      resetBtn.textContent = 'Tocá de nuevo para borrar tus cambios';
+      armTimer = setTimeout(() => { armed = false; resetBtn.classList.remove('armed'); resetBtn.textContent = resetLabel; }, 4000);
+      return;
+    }
+    clearTimeout(armTimer);
+    armed = false;
+    resetBtn.classList.remove('armed');
+    S = clone(DEFAULTS);
+    renderList('costos');
+    renderList('bonif');
+    syncScalars(null);
+    update();
+    resetBtn.textContent = 'Listo, volviste a la planilla';
+    setTimeout(() => { resetBtn.textContent = resetLabel; }, 2500);
+  });
+
+  // Barra con el precio cuando el rótulo sale de pantalla (teléfono)
+  const mini = $('mini');
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((entries) => {
+      const e = entries[0];
+      mini.classList.toggle('show', !e.isIntersecting && e.boundingClientRect.top < 0);
+    }).observe($('tag'));
+  }
+
+  function arrancar(d) {
+    DEFAULTS = d;
+    S = load();
+    renderList('costos');
+    renderList('bonif');
+    syncScalars(null);
+    update();
+    $('bloqueo').hidden = true;
+    $('app').hidden = false;
+    $('btnSalir').hidden = false;
+  }
+
+  /* ---------- descifrado (PBKDF2-SHA256 -> AES-256-CBC + HMAC-SHA256), igual que Stock Tandil ---------- */
+  function b64(s) { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+  function aB64(u) { let s = ''; for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); }
+  function derivar(clave, sobre) {
+    const sub = crypto.subtle;
+    return sub.importKey('raw', new TextEncoder().encode(clave), 'PBKDF2', false, ['deriveBits'])
+      .then((base) => sub.deriveBits({ name: 'PBKDF2', salt: b64(sobre.sal), iterations: sobre.it, hash: 'SHA-256' }, base, 512))
+      .then((bits) => new Uint8Array(bits));
+  }
+  function abrir(bits, sobre) {
+    const sub = crypto.subtle, iv = b64(sobre.iv), ct = b64(sobre.datos), mac = b64(sobre.mac);
+    const junto = new Uint8Array(iv.length + ct.length); junto.set(iv); junto.set(ct, iv.length);
+    return sub.importKey('raw', bits.slice(32), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify'])
+      .then((km) => sub.verify('HMAC', km, mac, junto))
+      .then((ok) => {
+        if (!ok) throw new Error('clave');
+        return sub.importKey('raw', bits.slice(0, 32), { name: 'AES-CBC' }, false, ['decrypt']);
+      })
+      .then((ka) => sub.decrypt({ name: 'AES-CBC', iv }, ka, ct))
+      .then((buf) => JSON.parse(new TextDecoder().decode(buf)));
+  }
+  function traerSobre() {
+    return fetch('datos.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => {
+      if (!r.ok) throw new Error('http');
+      return r.json();
+    });
+  }
+  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) { /* ignorado */ } }
+
+  /* ---------- entrada ---------- */
+  let sobre = null;
+  const mostrarError = (t) => { $('error').textContent = t; };
+  function entrarCon(bits, recordar) {
+    return abrir(bits, sobre).then((d) => {
+      if (recordar) { try { localStorage.setItem(KEY, JSON.stringify({ sal: sobre.sal, k: aB64(bits) })); } catch (e) { /* ignorado */ } }
+      arrancar(d);
+    });
+  }
+  $('bloqueo').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const clave = $('clave').value;
+    if (!clave) return;
+    if (!window.crypto || !crypto.subtle) { mostrarError('Este navegador no puede abrir la calculadora. Probá con Chrome o Safari actualizados.'); return; }
+    $('btnEntrar').disabled = true; $('btnEntrar').textContent = 'Abriendo…'; mostrarError('');
+    (sobre ? Promise.resolve(sobre) : traerSobre().then((s) => { sobre = s; return s; }))
+      .then(() => derivar(clave, sobre))
+      .then((bits) => entrarCon(bits, $('recordar').checked))
+      .catch((err) => { mostrarError(err && err.message === 'clave' ? 'Clave incorrecta.' : 'No se pudieron traer los datos. Revisá la conexión.'); })
+      .then(() => { $('btnEntrar').disabled = false; $('btnEntrar').textContent = 'Entrar'; });
+  });
+  $('btnSalir').addEventListener('click', () => { lsDel(KEY); lsDel(LS_KEY); location.reload(); });
+
+  let guardado = null;
+  try { guardado = JSON.parse(localStorage.getItem(KEY)); } catch (e) { /* ignorado */ }
+  traerSobre().then((s) => {
+    sobre = s;
+    if (guardado && guardado.sal === s.sal && window.crypto && crypto.subtle) {
+      return entrarCon(b64(guardado.k), true).catch(() => lsDel(KEY));
+    }
+  }).catch(() => mostrarError('No se pudieron traer los datos. Revisá la conexión.'));
+})();
+</script>
+</body>
+</html>
