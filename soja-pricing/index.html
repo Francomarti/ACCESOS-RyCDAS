@@ -513,19 +513,19 @@ td:hover { box-shadow: inset 0 0 0 2px var(--accent); }
           <input type="range" id="r-rend" data-key="rend" min="50" max="100" step="0.5" aria-label="Rendimiento de semilla, control deslizante">
           <div class="numwrap"><input id="f-rend" class="num" data-key="rend" data-dec="1" data-min="1" data-max="100" inputmode="decimal" autocomplete="off"><span class="unit">%</span></div>
         </div>
-        <p class="help">Qué parte del grano queda como semilla después de clasificar. El resto es descarte.</p>
+        <p class="help">Qué parte del grano queda como semilla después de clasificar. El resto es descarte, en promedio entre 15 y 20 %.</p>
       </div>
 
       <div class="field">
         <div class="field-head">
-          <label for="f-desc">Valor del descarte</label>
-          <span class="src">Hoja2 D13 / I2</span>
+          <label for="f-desc">Precio del descarte</label>
+          <span class="src">Valor de hoy, 21/10/2026</span>
         </div>
         <div class="ctl">
-          <input type="range" id="r-desc" data-key="descarte" min="0" max="100" step="5" aria-label="Valor del descarte, control deslizante">
-          <div class="numwrap"><input id="f-desc" class="num" data-key="descarte" data-dec="0" data-min="0" data-max="100" inputmode="decimal" autocomplete="off"><span class="unit">% soja</span></div>
+          <input type="range" id="r-desc" data-key="precioDesc" min="0" max="600" step="5" aria-label="Precio del descarte, control deslizante">
+          <div class="numwrap"><input id="f-desc" class="num" data-key="precioDesc" data-dec="0" data-min="0" inputmode="decimal" autocomplete="off"><span class="unit">USD/t</span></div>
         </div>
-        <p class="help">0 % si el descarte no se vende (como D13). 100 % si se vende a precio de grano (como I2, que divide por 25 bolsas).</p>
+        <p class="help">El descarte se vende más barato que la soja. Lo que se recupera al venderlo se descuenta del costo del grano y baja el costo de cada bolsa. Poné 0 si no se vende.</p>
       </div>
 
       <div class="field">
@@ -778,8 +778,10 @@ td:hover { box-shadow: inset 0 0 0 2px var(--accent); }
     const peso = Math.max(s.peso, 1);
     const bolsasTn = 1000 * rend / peso;
     const descKg = 1000 * (1 - rend);
-    const valorDesc = (descKg / 1000) * soja * (s.descarte / 100);
-    const grano = (soja - valorDesc) / bolsasTn;
+    const valorDesc = (descKg / 1000) * Math.max(s.precioDesc || 0, 0);   // recupero por tonelada procesada
+    const granoBruto = soja / bolsasTn;
+    const recupero = valorDesc / bolsasTn;
+    const grano = granoBruto - recupero;
     const bolsasHa = s.kgha * rend / peso;
     const porHa = s.costoHa > 0 && bolsasHa > 0 ? s.costoHa / bolsasHa : 0;
     const otros = sum(s.costos.filter((c) => c.on).map((c) => c.v));
@@ -791,7 +793,7 @@ td:hover { box-shadow: inset 0 0 0 2px var(--accent); }
     const margenUsd = precio - base;
     const ganancia = precio - costo + bonif;
     const conIva = precio * (1 + s.iva / 100);
-    return { soja, rend, peso, bolsasTn, descKg, valorDesc, grano, bolsasHa, porHa, otros, costo, bonif, base, precio, margenUsd, ganancia, conIva };
+    return { soja, rend, peso, bolsasTn, descKg, valorDesc, granoBruto, recupero, grano, bolsasHa, porHa, otros, costo, bonif, base, precio, margenUsd, ganancia, conIva };
   }
 
   // Campos simples
@@ -939,7 +941,8 @@ td:hover { box-shadow: inset 0 0 0 2px var(--accent); }
       return '<div class="bd-row' + (cls ? ' ' + cls : '') + '"><span>' + esc(label) + (note ? ' <small>' + esc(note) + '</small>' : '') +
         '</span><span>' + fmt(v) + '</span><span class="bd-bar"><i style="width:' + w.toFixed(2) + '%;background:' + color + '"></i></span></div>';
     };
-    let h = bar('Grano', r.grano, 'var(--bar-grain)', fmt(r.soja, 0) + ' USD/t ÷ ' + n1(r.bolsasTn) + ' bls');
+    let h = bar('Grano', r.granoBruto, 'var(--bar-grain)', fmt(r.soja, 0) + ' USD/t ÷ ' + n1(r.bolsasTn) + ' bls');
+    if (r.recupero > 0) h += bar('Recupero del descarte', -r.recupero, 'var(--gain)', fmt(r.descKg, 0) + ' kg a ' + fmt(S.precioDesc, 0) + ' USD/t', 'neg');
     S.costos.filter((c) => c.on).forEach((c) => { h += bar(c.nombre || 'Sin nombre', c.v, 'var(--bar-cost)'); });
     if (r.porHa > 0) h += bar('Costos por hectárea', r.porHa, 'var(--bar-cost)', fmt(S.costoHa, 0) + ' ÷ ' + n1(r.bolsasHa) + ' bls');
     h += '<div class="bd-row bd-sub"><span>Costo por bolsa</span><span>' + fmt(r.costo) + '</span></div>';
@@ -1023,7 +1026,9 @@ td:hover { box-shadow: inset 0 0 0 2px var(--accent); }
     $('d-prom').textContent = 'Promedio de las 4 fijaciones: USD ' + fmt(prom, 0) + '/t';
 
     $('d-grano').innerHTML = '1.000 kg de grano dan ' + n1(r.bolsasTn) + ' bolsas y ' + fmt(r.descKg, 0) + ' kg de descarte' +
-      (S.descarte > 0 ? ' (que vale ' + usd(r.valorDesc) + ')' : '') + '. Grano por bolsa: <b>' + usd(r.grano) + '</b>';
+      (r.valorDesc > 0
+        ? ', que se venden a ' + usd(r.valorDesc) + '. Grano por bolsa, ya descontado el recupero: <b>' + usd(r.grano) + '</b>'
+        : '. Grano por bolsa: <b>' + usd(r.grano) + '</b>');
     $('d-lote').innerHTML = 'Cada hectárea da ' + n1(r.bolsasHa) + ' bolsas. Costo por hectárea en cada bolsa: <b>' + usd(r.porHa) + '</b>';
     $('t-costos').textContent = 'Sin grano: ' + usd(r.otros);
     $('t-bonif').textContent = usd(r.bonif) + ' por bolsa';
@@ -1041,7 +1046,7 @@ td:hover { box-shadow: inset 0 0 0 2px var(--accent); }
     $('o-margen').textContent = usd(r.margenUsd);
     $('o-bonif').textContent = usd(r.bonif) + (S.descontar ? ' (al cliente)' : '');
     $('o-gan').textContent = usd(r.ganancia);
-    $('tag-foot').textContent = 'Soja ' + fmt(r.soja, 0) + ' USD/t · semilla ' + pct(S.rend) + ' · lote ' + fmt(S.kgha, 0) + ' kg/ha';
+    $('tag-foot').textContent = 'Soja ' + fmt(r.soja, 0) + ' USD/t · descarte ' + fmt(S.precioDesc, 0) + ' USD/t · semilla ' + pct(S.rend);
     $('mini-price').textContent = usd(r.precio);
     $('mini-cost').textContent = 'Costo ' + usd(r.costo);
 
